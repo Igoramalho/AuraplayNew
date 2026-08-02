@@ -1,0 +1,7 @@
+# Ignore dependencies
+node_modules
+dist
+build
+coverage
+node_modules/
+*json

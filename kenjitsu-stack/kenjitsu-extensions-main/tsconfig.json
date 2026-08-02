@@ -1,0 +1,29 @@
+{
+  "include": ["src"],
+  "exclude": ["**/*.test.ts","node_modules"],
+  "compilerOptions": {
+     "strict": true,
+        "noImplicitAny": true,
+        "esModuleInterop": true,
+        "strictNullChecks": true,
+        "target": "esnext",
+        "module": "nodeNext",
+        "moduleResolution": "nodeNext",
+
+        "noEmit": true,
+        "allowJs": true,
+        "declaration": true,
+        "skipLibCheck": true,
+        "isolatedModules": true,
+        "moduleDetection": "force",
+        "verbatimModuleSyntax": true,
+      
+        "outDir": "dist",
+        "rootDir": "./",
+        "sourceMap": false,
+        "removeComments": false,
+        "strictFunctionTypes": true,
+        "forceConsistentCasingInFileNames": true
+    
+  }
+}

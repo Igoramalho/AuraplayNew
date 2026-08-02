@@ -1,0 +1,55 @@
+{
+  "name": "kenjitsu-extensions",
+  "version": "0.0.0-development",
+  "description": "A lightweight Node.js scraper that extracts video sources from streaming sites",
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "module": "dist/main.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "dev": "pnpm build && node dist/main.js",
+    "test": "vitest  --config vitest.config.ts",
+    "lint": "tsc",
+    "ci": "tsc && pnpm test && pnpm run build",
+    "format": "prettier --write .",
+    "semantic-release": "semantic-release --branches main"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "anime",
+    "scraper",
+    "movies",
+    "tv"
+  ],
+  "author": "middlegear",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/middlegear/kenjitsu-extensions"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "homepage": "https://github.com/middlegear/kenjitsu-extensions",
+  "devDependencies": {
+    "@semantic-release/commit-analyzer": "13.0.1",
+    "@semantic-release/github": "12.0.9",
+    "@semantic-release/release-notes-generator": "14.1.1",
+    "@types/node": "24.13.3",
+    "prettier": "3.9.6",
+    "semantic-release": "24.2.9",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  },
+  "dependencies": {
+    "cheerio": "1.2.0",
+    "fastest-levenshtein": "1.0.16",
+    "impit": "0.14.3",
+    "p-queue": "9.3.3"
+  },
+  "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8"
+}

@@ -1,0 +1,3574 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraPlay Anime • Streaming & Player</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="__AURAPLAY_MEDIA_BASE_URL__hls.min.js"></script>
+
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        deep: {
+                            950: '#06090e',
+                            900: '#0b111e',
+                            850: '#101828',
+                            800: '#172236',
+                        },
+                        cyanGlow: {
+                            400: '#38bdf8',
+                            500: '#06b6d4',
+                            600: '#0891b2',
+                        }
+                    },
+                    boxShadow: {
+                        'neon-cyan': '0 0 25px -3px rgba(6, 182, 212, 0.4)',
+                        'neon-emerald': '0 0 25px -3px rgba(16, 185, 129, 0.4)',
+                        'deep-card': '0 20px 40px -15px rgba(0, 0, 0, 0.6)',
+                        'light-card': '0 10px 30px -5px rgba(0, 0, 0, 0.08)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Dark / Light Transitions */
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Glassmorphism Panels (Dark Mode) */
+        .dark .glass-panel {
+            background: rgba(11, 17, 30, 0.82);
+            backdrop-filter: blur(24px) saturate(190%);
+            -webkit-backdrop-filter: blur(24px) saturate(190%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .dark .glass-controls {
+            background: rgba(8, 14, 26, 0.90);
+            backdrop-filter: blur(28px) saturate(200%);
+            -webkit-backdrop-filter: blur(28px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .dark .app-bg {
+            background-color: #06090e;
+            color: #f1f5f9;
+        }
+
+        /* Glassmorphism Panels (Light Mode) */
+        html:not(.dark) .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        html:not(.dark) .glass-controls {
+            background: rgba(245, 247, 250, 0.92);
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .control-glass {
+            background: linear-gradient(135deg, rgba(20, 31, 49, 0.84), rgba(8, 15, 27, 0.70));
+            backdrop-filter: blur(16px) saturate(165%);
+            -webkit-backdrop-filter: blur(16px) saturate(165%);
+            border: 1px solid rgba(103, 232, 249, 0.16);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 0 14px rgba(34, 211, 238, 0.08);
+        }
+        .control-glass:hover,
+        .control-glass:focus-within {
+            border-color: rgba(103, 232, 249, 0.30);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 0 18px rgba(34, 211, 238, 0.13);
+        }
+
+        html:not(.dark) .app-bg {
+            background-color: #f1f5f9;
+            color: #0f172a;
+        }
+
+        /* Sleek Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.25);
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(6, 182, 212, 0.6);
+        }
+
+        /* Range Input Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            border-radius: 999px;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.9);
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -4px;
+            position: relative;
+            z-index: 20;
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+        }
+
+        select option {
+            background-color: #0b111e !important;
+            color: #f1f5f9 !important;
+            padding: 8px 12px;
+        }
+        html:not(.dark) select option {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+
+        .horizontal-scroll-snap {
+            scroll-snap-type: x mandatory;
+        }
+        .horizontal-scroll-snap > * {
+            scroll-snap-align: start;
+        }
+
+        /* Player fullscreen: vídeo preserva proporção e os controles surgem pelo rodapé. */
+        #viewPlayer:fullscreen {
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            cursor: none;
+        }
+        #viewPlayer:fullscreen #playerControls {
+            position: absolute;
+            left: 16px;
+            right: 16px;
+            bottom: 0;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(calc(100% + 18px));
+            transition: opacity 180ms ease, transform 220ms ease;
+        }
+        #viewPlayer:fullscreen.controls-visible #playerControls,
+        #viewPlayer:fullscreen #playerControls:hover,
+        #viewPlayer:fullscreen #playerControls:focus-within {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+        #viewPlayer:fullscreen #episodeDrawer { bottom: 96px; }
+        #viewPlayer:fullscreen #playerBackBtn {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-12px);
+            transition: opacity 180ms ease, transform 220ms ease;
+        }
+        #viewPlayer:fullscreen.ui-visible,
+        #viewPlayer:fullscreen.controls-visible {
+            cursor: default;
+        }
+        #viewPlayer:fullscreen.ui-visible #playerBackBtn,
+        #viewPlayer:fullscreen #playerBackBtn:hover,
+        #viewPlayer:fullscreen #playerBackBtn:focus-visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+        #viewPlayer:fullscreen #mainVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        body.pip-mode { background: #000; }
+        body.pip-mode #appHeader,
+        body.pip-mode #appSidebar { display: none !important; }
+        body.pip-mode #appLayout { padding: 0 !important; gap: 0 !important; }
+        body.pip-mode #appMain {
+            border: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background: #000 !important;
+        }
+        body.pip-mode #viewPlayer {
+            display: flex !important;
+            position: fixed !important;
+            inset: 0 !important;
+            z-index: 100 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: #000 !important;
+        }
+        body.pip-mode #viewPlayer > div:first-child {
+            position: absolute !important;
+            inset: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+        body.pip-mode #playerBackBtn,
+        body.pip-mode #fxDrawer,
+        body.pip-mode #episodeDrawer,
+        body.pip-mode #toast { display: none !important; }
+        body.pip-mode #playerControls { display: none !important; }
+        body.pip-mode #centerPlayBtn { display: none !important; }
+        #customPipChrome { display: none; }
+        body.pip-mode #customPipChrome {
+            display: block !important;
+            position: fixed !important;
+            inset: 0 !important;
+            z-index: 2147483647 !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            isolation: isolate;
+        }
+        body.pip-mode #customPipChrome > div,
+        body.pip-mode #customPipChrome > button {
+            z-index: 2147483647 !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        body.pip-mode #mainVideo { width: 100%; height: 100%; object-fit: contain; }
+        #customPipSpeedButton {
+            color: #67e8f9;
+            background: rgba(8, 35, 44, .94);
+            border-color: rgba(34, 211, 238, .38);
+            box-shadow: none;
+        }
+        .custom-pip-speed-option:hover,
+        .custom-pip-speed-option.active {
+            color: #061016;
+            background: rgba(20, 184, 166, .9);
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden select-none app-bg">
+
+    <header id="appHeader" class="relative z-50 h-14 glass-panel flex items-center justify-between px-6 text-xs shrink-0 border-b">
+        <!-- Logo & Branding -->
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchNav('home')">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 via-teal-500 to-emerald-500 flex items-center justify-center shadow-neon-cyan">
+                <i data-lucide="sparkles" class="w-5 h-5 text-slate-950"></i>
+            </div>
+            <div class="flex flex-col">
+                <span class="font-extrabold tracking-widest text-base bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400">
+                    AURA<span class="font-light text-slate-700 dark:text-slate-200">PLAY</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Right Header Action Items -->
+        <div class="flex items-center gap-4">
+            <button id="shortcutsBtn" class="p-2 hover:bg-slate-200 dark:hover:bg-white/10 rounded-xl text-slate-600 dark:text-slate-400 hover:text-cyan-500 dark:hover:text-white transition flex items-center gap-2 text-xs font-medium" title="Atalhos do Teclado">
+                <i data-lucide="keyboard" class="w-4 h-4 text-cyan-500 dark:text-cyan-400"></i>
+                <span class="hidden sm:inline">Atalhos</span>
+            </button>
+            <div class="h-4 w-px bg-slate-300 dark:bg-white/10"></div>
+            <!-- Window Style Buttons -->
+            <div class="flex items-center gap-1.5">
+                <button id="windowMinimizeBtn" class="w-3 h-3 rounded-full bg-amber-500/80 hover:bg-amber-400 transition" title="Minimizar" aria-label="Minimizar"></button>
+                <button id="windowMaximizeBtn" class="w-3 h-3 rounded-full bg-emerald-500/80 hover:bg-emerald-400 transition" title="Maximizar ou Restaurar" aria-label="Maximizar ou Restaurar"></button>
+                <button id="windowCloseBtn" class="w-3 h-3 rounded-full bg-rose-500/80 hover:bg-rose-400 transition" title="Fechar" aria-label="Fechar"></button>
+            </div>
+        </div>
+    </header>
+
+    <div id="customPipChrome" class="pointer-events-none text-white">
+        <div class="absolute top-1 left-2 pointer-events-auto">
+            <button id="customPipSettingsBtn" class="w-9 h-9 text-cyan-300 hover:text-emerald-300 flex items-center justify-center transition drop-shadow-lg" title="Configurações" aria-label="Configurações"><i data-lucide="settings" class="w-5 h-5"></i></button>
+            <div id="customPipSettingsMenu" class="hidden absolute top-9 left-0 w-32 p-2 rounded-xl bg-[#07151c]/95 backdrop-blur-xl border border-cyan-400/25 shadow-2xl shadow-cyan-950/40">
+                <label class="block text-[10px] text-cyan-100/80 mb-1">Velocidade</label>
+                <button id="customPipSpeedButton" class="w-full rounded-lg border px-2 py-1.5 text-xs font-semibold flex items-center justify-between"><span id="customPipSpeedValue">1.0x</span><i data-lucide="chevron-down" class="w-3 h-3"></i></button>
+                <div id="customPipSpeedOptions" class="hidden mt-1 overflow-hidden rounded-lg border border-cyan-400/20 bg-[#07151c]">
+                    <button data-speed="0.5" class="custom-pip-speed-option block w-full px-2 py-1 text-left text-xs text-cyan-100 transition">0.5x</button><button data-speed="1" class="custom-pip-speed-option active block w-full px-2 py-1 text-left text-xs text-cyan-100 transition">1.0x</button><button data-speed="1.25" class="custom-pip-speed-option block w-full px-2 py-1 text-left text-xs text-cyan-100 transition">1.25x</button><button data-speed="1.5" class="custom-pip-speed-option block w-full px-2 py-1 text-left text-xs text-cyan-100 transition">1.5x</button><button data-speed="2" class="custom-pip-speed-option block w-full px-2 py-1 text-left text-xs text-cyan-100 transition">2.0x</button>
+                </div>
+            </div>
+        </div>
+        <div class="absolute top-1 right-2 flex items-center pointer-events-auto">
+            <button id="customPipRestoreBtn" class="w-9 h-9 text-cyan-300 hover:text-emerald-300 flex items-center justify-center transition drop-shadow-lg" title="Voltar ao AuraPlay" aria-label="Voltar ao AuraPlay"><i data-lucide="maximize" class="w-5 h-5"></i></button>
+        </div>
+        <button id="customPipMuteBtn" class="absolute bottom-1 left-2 w-9 h-9 text-cyan-300 hover:text-emerald-300 flex items-center justify-center pointer-events-auto transition drop-shadow-lg" title="Ativar ou desativar som" aria-label="Ativar ou desativar som"><i data-lucide="headphones" class="w-5 h-5"></i></button>
+        <button id="customPipPlayBtn" class="absolute bottom-1 left-1/2 -translate-x-1/2 w-9 h-9 text-cyan-300 hover:text-emerald-300 flex items-center justify-center pointer-events-auto transition drop-shadow-lg" title="Reproduzir ou pausar" aria-label="Reproduzir ou pausar"><i data-lucide="play" class="w-5 h-5 fill-current"></i></button>
+        <button id="customPipNextBtn" class="absolute bottom-1 right-2 w-9 h-9 text-cyan-300 hover:text-emerald-300 flex items-center justify-center pointer-events-auto transition drop-shadow-lg" title="Próximo episódio" aria-label="Próximo episódio"><i data-lucide="skip-forward" class="w-5 h-5 fill-current"></i></button>
+    </div>
+
+    <div id="appLayout" class="relative z-10 flex-1 flex overflow-hidden p-3 gap-3">
+
+        <!-- Navigation Sidebar -->
+        <aside id="appSidebar" class="w-64 glass-panel rounded-2xl flex flex-col shrink-0 overflow-hidden shadow-deep-card border">
+            
+            <!-- Navigation Menu Links -->
+            <div class="p-4 space-y-1">
+                <p class="text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 px-3 mb-2">Navegação</p>
+                
+                <button id="navHome" onclick="switchNav('home')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs transition text-cyan-600 dark:text-cyan-300 bg-cyan-500/10 border border-cyan-500/30">
+                    <i data-lucide="home" class="w-4 h-4"></i>
+                    <span>Página Inicial</span>
+                </button>
+
+                <button id="navSearch" onclick="switchNav('search')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs transition text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 hover:text-cyan-500 dark:hover:text-white border border-transparent">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                    <span>Pesquisar</span>
+                </button>
+
+                <button id="navSettings" onclick="switchNav('settings')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs transition text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 hover:text-cyan-500 dark:hover:text-white border border-transparent">
+                    <i data-lucide="settings" class="w-4 h-4"></i>
+                    <span>Configurações</span>
+                </button>
+            </div>
+
+            <div class="px-4 py-2">
+                <div class="h-px bg-slate-200 dark:bg-white/10 w-full"></div>
+            </div>
+
+            <!-- Quick Favorites / Library Shortcut -->
+            <div class="flex-1 overflow-y-auto px-4 py-2 space-y-3">
+                <div class="flex items-center justify-between">
+                    <p class="text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500">Meus Animes</p>
+                    <span id="favCountBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">3 Salvos</span>
+                </div>
+                
+                <div id="quickFavoritesList" class="space-y-2">
+                    <!-- Dynamic Favorites populated by JS -->
+                </div>
+            </div>
+
+            <!-- Currently Playing Bar (If video loaded) -->
+            <div id="sidebarNowPlaying" class="m-3 p-3 rounded-xl bg-slate-200/70 dark:bg-deep-900/90 border border-slate-300 dark:border-white/10 flex items-center gap-3 hidden cursor-pointer" onclick="switchNav('player')">
+                <img id="sidebarPlayerThumb" src="" class="w-10 h-10 rounded-lg object-cover">
+                <div class="flex-1 min-w-0">
+                    <p id="sidebarPlayerTitle" class="text-xs font-semibold truncate text-slate-800 dark:text-slate-100">Título do Anime</p>
+                    <p id="sidebarPlayerSub" class="text-[10px] text-cyan-600 dark:text-cyan-400 truncate">Assistindo agora...</p>
+                </div>
+                <i data-lucide="play-circle" class="w-5 h-5 text-cyan-500 shrink-0"></i>
+            </div>
+        </aside>
+
+        <main id="appMain" class="flex-1 relative glass-panel rounded-2xl overflow-hidden border shadow-deep-card flex flex-col">
+            
+            <!-- VIEW 1: PÁGINA INICIAL (HOME VIEW) -->
+            <div id="viewHome" class="relative flex-1 overflow-y-auto p-6 space-y-8">
+                <div id="homeApiStatus" class="absolute inset-0 z-40 hidden items-center justify-center bg-slate-950/70 backdrop-blur-sm">
+                    <div class="glass-panel rounded-2xl border border-cyan-500/20 px-6 py-5 text-center shadow-2xl">
+                        <div id="homeApiSpinner" class="mx-auto mb-3 w-7 h-7 rounded-full border-2 border-cyan-400/25 border-t-cyan-400 animate-spin"></div>
+                        <p id="homeApiStatusText" class="text-sm text-slate-200">Carregando catálogo...</p>
+                        <button id="homeApiRetryBtn" class="hidden mt-3 px-4 py-2 rounded-xl bg-cyan-500 text-slate-950 text-xs font-semibold hover:bg-cyan-400 transition">Tentar novamente</button>
+                    </div>
+                </div>
+                
+                <!-- Destaque da Semana (Hero Banner fed by API/Data) -->
+				<div id="featuredHero" class="hidden relative rounded-2xl overflow-hidden min-h-[300px] lg:min-h-[360px] flex items-end p-6 md:p-8 border border-white/10 shadow-2xl bg-slate-900">
+					<img id="heroImage" src="" class="absolute inset-0 w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-transparent to-transparent"></div>
+
+                    <div class="relative z-10 max-w-2xl space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-bold text-[10px] tracking-wider uppercase">
+                                ★ DESTAQUE DA SEMANA
+                            </span>
+                            <span id="heroRating" class="px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-amber-400 font-mono text-xs border border-amber-400/30 flex items-center gap-1">
+								<i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i> —
+                            </span>
+                        </div>
+                        
+						<h1 id="heroTitle" class="text-2xl md:text-4xl font-extrabold text-white tracking-tight drop-shadow-md"></h1>
+						<p id="heroDesc" class="text-xs md:text-sm text-slate-300 line-clamp-2 md:line-clamp-3 leading-relaxed max-w-xl"></p>
+
+                        <div class="flex items-center gap-3 pt-2">
+                            <button id="heroPlayBtn" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 hover:scale-105 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-neon-cyan transition transform active:scale-95">
+                                <i data-lucide="play" class="w-4 h-4 fill-slate-950"></i> Assistir Agora
+                            </button>
+                            <button id="heroFavBtn" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-medium text-xs flex items-center gap-2 border border-white/20 transition">
+                                <i data-lucide="heart" class="w-4 h-4 text-rose-400"></i> Favoritar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Continuar Assistindo -->
+                <section id="continueWatchingWrapper" class="space-y-4 hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="play-circle" class="w-4 h-4 text-cyan-500"></i>
+                            <h2 class="font-bold text-base text-slate-900 dark:text-slate-100">Continuar Assistindo</h2>
+                        </div>
+                        <span class="text-xs text-slate-500 dark:text-slate-400">De onde você parou</span>
+                    </div>
+
+                    <div id="continueWatchingSection" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        <!-- Populated dynamically from the native playback history. -->
+                    </div>
+                </section>
+
+                <!-- Section: Meus Favoritos -->
+                <section class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="heart" class="w-4 h-4 text-rose-500"></i>
+                            <h2 class="font-bold text-base text-slate-900 dark:text-slate-100">Meus Favoritos</h2>
+                        </div>
+                        <span class="text-xs text-slate-500 dark:text-slate-400">Animes salvos na sua lista</span>
+                    </div>
+
+                    <div id="favoritesSection" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        <!-- Populated dynamically -->
+                    </div>
+                </section>
+
+                <!-- Section: Populares da Temporada -->
+                <section class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="trending-up" class="w-4 h-4 text-cyan-500"></i>
+                            <h2 class="font-bold text-base text-slate-900 dark:text-slate-100">Populares da Temporada</h2>
+                        </div>
+                        <span class="text-xs text-slate-500 dark:text-slate-400">Mais assistidos no AuraPlay</span>
+                    </div>
+
+                    <div id="popularSection" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        <!-- Populated dynamically -->
+                    </div>
+                </section>
+
+                <!-- Section: Lançamentos Recentes -->
+                <section class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-emerald-500"></i>
+                            <h2 class="font-bold text-base text-slate-900 dark:text-slate-100">Lançamentos Recentes</h2>
+                        </div>
+                        <span class="text-xs text-slate-500 dark:text-slate-400">Novos episódios adicionados</span>
+                    </div>
+
+                    <div id="recentSection" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        <!-- Populated dynamically -->
+                    </div>
+                </section>
+            </div>
+
+            <div id="viewSearch" class="flex-1 overflow-y-auto p-6 space-y-6 hidden">
+                <div class="space-y-2">
+                    <h2 class="font-extrabold text-xl text-slate-900 dark:text-slate-100">Catálogo & Pesquisa</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Explore todos os animes disponíveis ou procure por títulos e gêneros.</p>
+                </div>
+
+                <!-- Search Input Bar & Genre Tags -->
+                <div class="space-y-3">
+                    <div class="relative max-w-2xl">
+                        <i data-lucide="search" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="catalogSearchInput" placeholder="Digite o nome do anime ou gênero (ex: Solo Leveling, Ação)..." class="w-full bg-slate-200/80 dark:bg-deep-950/80 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 pl-12 pr-10 py-3 rounded-xl border border-slate-300 dark:border-white/10 focus:outline-none focus:border-cyan-500 transition shadow-inner">
+                        <button id="clearSearchBtn" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white hidden">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <!-- Category Pills -->
+                    <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs" id="genreFilterContainer">
+                        <button onclick="filterGenre('Todos')" class="genre-pill active px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-semibold shadow-sm transition">Todos</button>
+                        <button onclick="filterGenre('Ação')" class="genre-pill px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-white/10 transition">Ação</button>
+                        <button onclick="filterGenre('Fantasia')" class="genre-pill px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-white/10 transition">Fantasia</button>
+                        <button onclick="filterGenre('Sci-Fi')" class="genre-pill px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-white/10 transition">Sci-Fi</button>
+                        <button onclick="filterGenre('Aventura')" class="genre-pill px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-white/10 transition">Aventura</button>
+                    </div>
+                </div>
+
+                <!-- Search Results Summary -->
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
+                    <span id="searchResultsCount" class="text-xs font-mono text-cyan-600 dark:text-cyan-400">Exibindo todos os animes</span>
+                </div>
+
+                <!-- Catalog Grid -->
+                <div id="catalogGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+                    <!-- Cards injected by JS -->
+                </div>
+                <div id="searchPagination" class="hidden items-center justify-center gap-3">
+                    <button id="searchPrevBtn" class="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-300 hover:text-cyan-300 disabled:opacity-40">Anterior</button>
+                    <span id="searchPageLabel" class="text-xs font-mono text-slate-400">Página 1</span>
+                    <button id="searchNextBtn" class="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-300 hover:text-cyan-300 disabled:opacity-40">Próxima</button>
+                </div>
+                <section id="remoteSearchWrapper" class="hidden space-y-4 pt-2">
+                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-slate-100">Resultados remotos</h3>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400">Somente consulta — nenhum anime será importado.</p>
+                        </div>
+                        <span id="remoteResultsCount" class="text-xs font-mono text-emerald-500"></span>
+                    </div>
+                    <div id="remoteCatalogGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5"></div>
+                    <div id="remoteSearchPagination" class="hidden items-center justify-center gap-3">
+                        <button id="remotePrevBtn" class="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-300 hover:text-cyan-300 disabled:opacity-40">Anterior</button>
+                        <span id="remotePageLabel" class="text-xs font-mono text-slate-400">Página 1</span>
+                        <button id="remoteNextBtn" class="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-300 hover:text-cyan-300 disabled:opacity-40">Próxima</button>
+                    </div>
+                </section>
+            </div>
+
+            <div id="viewDetails" class="flex-1 overflow-y-auto p-6 space-y-6 hidden">
+                <button id="detailsBackBtn" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-slate-300 hover:text-white transition">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i><span>Voltar</span>
+                </button>
+                <div id="detailsLoading" class="py-16 text-center text-sm text-slate-400">Carregando detalhes...</div>
+                <div id="detailsContent" class="hidden space-y-6">
+                    <div class="relative rounded-2xl overflow-hidden min-h-[300px] flex items-end p-6 md:p-8 border border-white/10 shadow-2xl bg-slate-900">
+                        <img id="detailsBanner" src="" alt="" onerror="applyImageFallback(this)" class="absolute inset-0 w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent"></div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-transparent to-transparent"></div>
+                        <div class="relative z-10 max-w-3xl space-y-3">
+                            <div class="flex items-center gap-2 text-[10px] font-mono">
+                                <span id="detailsPlaybackBadge" class="px-2 py-1 rounded bg-cyan-500 text-slate-950 font-bold"></span>
+                                <span id="detailsScore" class="px-2 py-1 rounded bg-black/60 text-amber-400"></span>
+                            </div>
+                            <h2 id="detailsTitle" class="font-extrabold text-3xl text-white"></h2>
+                            <p id="detailsDescription" class="text-sm text-slate-200 leading-relaxed"></p>
+                            <p id="detailsMetadata" class="text-xs text-slate-400"></p>
+                        </div>
+                    </div>
+                    <section class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                            <div class="flex items-center gap-2"><i data-lucide="list-video" class="w-4 h-4 text-cyan-400"></i><h3 class="font-bold text-base text-slate-100">Temporadas e Episódios</h3></div>
+                            <span id="detailsEpisodeCount" class="text-xs font-mono text-cyan-400"></span>
+                        </div>
+                        <div id="detailsSeasonTabs" class="flex items-center gap-2 overflow-x-auto pb-1"></div>
+                        <div id="detailsEpisodesList" class="grid grid-cols-1 lg:grid-cols-2 gap-3"></div>
+                    </section>
+                </div>
+                <div id="detailsError" class="hidden py-16 text-center space-y-3">
+                    <p id="detailsErrorText" class="text-sm text-rose-300"></p>
+                    <button id="detailsRetryBtn" class="px-4 py-2 rounded-xl bg-cyan-500 text-slate-950 text-xs font-semibold">Tentar novamente</button>
+                </div>
+            </div>
+
+            <div id="viewSettings" class="flex-1 overflow-y-auto p-6 space-y-8 hidden max-w-3xl">
+                <div class="space-y-1 border-b border-slate-200 dark:border-white/10 pb-4">
+                    <h2 class="font-extrabold text-xl text-slate-900 dark:text-slate-100">Configurações</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Personalize o tema e comportamento do seu player AuraPlay.</p>
+                </div>
+
+                <!-- Tema e Aparência Settings Card -->
+                <div class="p-5 rounded-2xl bg-slate-100 dark:bg-deep-900/60 border border-slate-200 dark:border-white/10 space-y-5">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-500">
+                            <i data-lucide="palette" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-slate-100">Tema & Aparência</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Escolha o modo de cor preferido para a interface.</p>
+                        </div>
+                    </div>
+
+                    <!-- Theme Toggle Buttons -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Dark Theme Option -->
+                        <div id="themeOptDark" onclick="setTheme('dark')" class="p-4 rounded-xl border-2 border-cyan-500 bg-deep-950 text-white cursor-pointer flex flex-col items-center gap-3 shadow-lg transition">
+                            <div class="w-full h-16 rounded-lg bg-deep-900 border border-white/10 flex items-center justify-center">
+                                <i data-lucide="moon" class="w-6 h-6 text-cyan-400"></i>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold">Escuro (Dark OLED)</span>
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-cyan-400" id="checkDark"></i>
+                            </div>
+                        </div>
+
+                        <!-- Light Theme Option -->
+                        <div id="themeOptLight" onclick="setTheme('light')" class="p-4 rounded-xl border-2 border-transparent bg-slate-200 hover:bg-slate-300 text-slate-900 cursor-pointer flex flex-col items-center gap-3 transition">
+                            <div class="w-full h-16 rounded-lg bg-white border border-slate-300 flex items-center justify-center">
+                                <i data-lucide="sun" class="w-6 h-6 text-amber-500"></i>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold">Claro (White)</span>
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-cyan-500 hidden" id="checkLight"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reproduction Settings -->
+                <div class="p-5 rounded-2xl bg-slate-100 dark:bg-deep-900/60 border border-slate-200 dark:border-white/10 space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500">
+                            <i data-lucide="sliders" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-slate-100">Preferências do Player</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Opções automáticas de reprodução.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 pt-2 text-xs">
+                        <label class="flex items-center justify-between p-3 rounded-xl bg-white/50 dark:bg-deep-950/50 border border-slate-200 dark:border-white/5 cursor-pointer">
+                            <span class="font-medium text-slate-700 dark:text-slate-300">Autoplay do Próximo Episódio</span>
+                            <input type="checkbox" checked class="w-4 h-4 accent-cyan-500 rounded">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-xl bg-white/50 dark:bg-deep-950/50 border border-slate-200 dark:border-white/5 cursor-pointer">
+                            <span class="font-medium text-slate-700 dark:text-slate-300">Lembrar posição do vídeo ao retornar</span>
+                            <input type="checkbox" checked class="w-4 h-4 accent-cyan-500 rounded">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="viewPlayer" class="relative flex-1 flex flex-col md:flex-row overflow-hidden hidden">
+                
+                <!-- Video Screen -->
+                <div class="flex-1 relative bg-black flex items-center justify-center overflow-hidden group">
+                    <video id="mainVideo" class="w-full h-full object-contain" preload="metadata">
+                        <source src="" type="video/mp4">
+                        Seu navegador não suporta reprodução de vídeo.
+                    </video>
+
+                    <!-- Overlay Back Button -->
+					<button id="playerBackBtn" onclick="navigateBack()" class="absolute top-4 left-4 z-30 p-2.5 rounded-xl bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/10 flex items-center gap-2 text-xs font-medium transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+						<span>Voltar</span>
+                    </button>
+
+                    <div id="pipWindowControls" class="hidden absolute top-2 right-2 z-40 items-center gap-1.5">
+                        <span class="px-2 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-semibold text-cyan-300">AuraPlay PiP</span>
+                        <button id="pipRestoreBtn" class="w-8 h-8 rounded-lg bg-black/65 hover:bg-cyan-500/25 border border-white/15 text-white flex items-center justify-center transition" title="Voltar ao AuraPlay" aria-label="Voltar ao AuraPlay">
+                            <i data-lucide="panel-top-open" class="w-4 h-4"></i>
+                        </button>
+                        <button id="pipCloseBtn" class="w-8 h-8 rounded-lg bg-black/65 hover:bg-rose-500/30 border border-white/15 text-white flex items-center justify-center transition" title="Sair do PiP" aria-label="Sair do PiP">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <!-- Floating Center Play/Pause Indicator Button -->
+                    <button id="centerPlayBtn" class="absolute z-20 w-20 h-20 rounded-full bg-cyan-500/25 hover:bg-cyan-500/40 border border-cyan-400/40 text-white flex items-center justify-center backdrop-blur-md shadow-neon-cyan transition-all transform hover:scale-110 active:scale-95">
+                        <i data-lucide="pause" class="w-8 h-8 fill-white text-cyan-100"></i>
+                    </button>
+
+                    <!-- Toast HUD Notification -->
+                    <div id="toast" class="absolute top-6 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-xl glass-controls text-xs font-medium text-white flex items-center gap-2.5 opacity-0 transition-all duration-300 pointer-events-none transform -translate-y-3 shadow-2xl border border-white/15">
+                        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+                        <span id="toastText">Notificação</span>
+                    </div>
+
+                    <!-- Video FX Drawer Overlay -->
+                    <div id="fxDrawer" class="absolute top-4 right-4 z-30 glass-controls rounded-xl p-3.5 border border-white/15 w-64 text-xs space-y-3 shadow-2xl transition-all duration-300 opacity-0 pointer-events-none transform translate-x-4">
+                        <div class="flex items-center justify-between border-b border-white/10 pb-2">
+                            <span class="font-semibold text-cyan-300 flex items-center gap-1.5"><i data-lucide="sliders" class="w-3.5 h-3.5"></i> Ajustes de Imagem</span>
+                            <button id="closeFxBtn" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                        </div>
+
+                        <!-- Brightness -->
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[11px] text-slate-300">
+                                <span>Brilho</span>
+                                <span id="valBrightness" class="font-mono text-cyan-400">100%</span>
+                            </div>
+                            <input type="range" id="sliderBrightness" min="50" max="150" value="100" class="w-full h-1 bg-white/20 accent-cyan-400">
+                        </div>
+
+                        <!-- Contrast -->
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[11px] text-slate-300">
+                                <span>Contraste</span>
+                                <span id="valContrast" class="font-mono text-teal-400">100%</span>
+                            </div>
+                            <input type="range" id="sliderContrast" min="50" max="180" value="100" class="w-full h-1 bg-white/20 accent-teal-400">
+                        </div>
+
+                        <!-- Saturation -->
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[11px] text-slate-300">
+                                <span>Saturação</span>
+                                <span id="valSaturate" class="font-mono text-emerald-400">100%</span>
+                            </div>
+                            <input type="range" id="sliderSaturate" min="0" max="200" value="100" class="w-full h-1 bg-white/20 accent-emerald-400">
+                        </div>
+
+                        <button id="resetFxBtn" class="w-full py-1.5 text-[11px] bg-white/5 hover:bg-white/10 rounded-lg text-slate-300 transition border border-white/5">Resetar Efeitos</button>
+                    </div>
+
+                    <!-- Bottom Controls Bar -->
+                    <div id="playerControls" class="absolute bottom-4 left-4 right-4 z-20 glass-controls rounded-2xl p-3 px-5 border border-white/15 shadow-2xl transition-all duration-300 transform translate-y-1 group-hover:translate-y-0">
+                        <!-- Timeline Scrub Bar -->
+                        <div class="relative flex items-center gap-3 mb-2.5">
+                            <span id="currentTime" class="text-xs font-mono text-slate-300 w-11 text-right">00:00</span>
+                            
+                            <div class="relative flex-1 flex items-center h-3 rounded-full bg-slate-900/55 border border-white/10">
+                                <div id="seekProgress" class="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-cyan-500/85 via-teal-400/85 to-emerald-400/85 rounded-r-full pointer-events-none z-0 shadow-neon-cyan" style="width: 0%;"></div>
+                                <input type="range" id="seekBar" min="0" max="100" value="0" step="0.1" class="relative z-10 w-full h-full appearance-none bg-transparent cursor-pointer">
+                            </div>
+                            
+                            <span id="durationTime" class="text-xs font-mono text-slate-400 w-11">00:00</span>
+                        </div>
+
+                        <!-- Action Row -->
+                        <div class="flex items-center justify-between gap-3 w-full">
+                            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                                <button id="prevEpBtn" class="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition" title="Episódio Anterior">
+                                    <i data-lucide="skip-back" class="w-4 h-4"></i>
+                                </button>
+                                
+                                <button id="playPauseBtn" class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 via-teal-500 to-emerald-500 hover:scale-105 text-slate-950 flex items-center justify-center shadow-neon-cyan transition transform active:scale-95 shrink-0">
+                                    <i data-lucide="play" id="playIcon" class="w-5 h-5 fill-slate-950 ml-0.5"></i>
+                                </button>
+
+                                <button id="nextEpBtn" class="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition" title="Próximo Episódio">
+                                    <i data-lucide="skip-forward" class="w-4 h-4"></i>
+                                </button>
+
+                                <!-- Layer-fixed Volume Bar -->
+                                <div class="flex items-center gap-2 px-2 py-1.5 rounded-xl bg-white/5 border border-white/5">
+                                    <button id="muteBtn" class="text-cyan-400 hover:text-white transition shrink-0" title="Mute">
+                                        <i data-lucide="volume-2" id="volumeIcon" class="w-4 h-4"></i>
+                                    </button>
+                                    
+                                    <div class="relative w-16 sm:w-20 flex items-center h-4">
+                                        <div id="volumeProgress" class="absolute left-0 top-1/2 -translate-y-1/2 h-1.5 bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-lg pointer-events-none z-0" style="width: 100%;"></div>
+                                        <input type="range" id="volumeBar" min="0" max="1" step="0.05" value="1" class="relative z-10 w-full h-1.5 rounded-lg appearance-none bg-white/20 cursor-pointer">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FX & Screen Options -->
+                            <div class="pip-hide flex items-center gap-1.5 shrink-0">
+                                <!-- As opções serão preenchidas somente quando a fonte informar faixas reais. -->
+                                <div class="control-glass flex items-center gap-1.5 text-xs font-medium rounded-xl px-2.5 py-1.5 text-slate-200 transition">
+                                    <i data-lucide="subtitles" class="w-4 h-4 text-cyan-400 shrink-0"></i>
+                                    <select id="subtitleSelect"
+                                            class="bg-transparent text-slate-100 text-xs focus:outline-none cursor-pointer pr-1 disabled:opacity-60 disabled:cursor-not-allowed"
+                                            title="Legendas disponíveis na fonte">
+                                        <option value="off">Legendas: Off</option>
+                                    </select>
+                                </div>
+
+                                <button id="toggleFxBtn" class="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition" title="Ajustes de Imagem">
+                                    <i data-lucide="sliders" class="w-4 h-4"></i>
+                                </button>
+
+                                <select id="speedSelect" class="control-glass text-slate-100 text-xs font-medium rounded-xl px-2 py-1.5 cursor-pointer transition">
+                                    <option value="0.5">0.5x</option>
+                                    <option value="1.0" selected>1.0x Normal</option>
+                                    <option value="1.25">1.25x</option>
+                                    <option value="1.5">1.5x</option>
+                                    <option value="2.0">2.0x</option>
+                                </select>
+
+                                <button id="pipBtn" class="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition" title="Picture-in-Picture">
+                                    <i data-lucide="picture-in-picture-2" class="w-4 h-4"></i>
+                                </button>
+
+                                <button id="fullscreenBtn" class="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition" title="Tela Cheia">
+                                    <i data-lucide="maximize" class="w-4 h-4"></i>
+                                </button>
+
+                                <button id="episodeDrawerButton"
+                                        onclick="toggleEpisodeDrawer()"
+                                        class="p-2 text-cyan-400 hover:text-white hover:bg-cyan-500/20 rounded-xl transition border border-cyan-500/30"
+                                        title="Lista de Episódios"
+                                        aria-label="Lista de Episódios"
+                                        aria-expanded="false">
+                                    <i data-lucide="list-video" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Retractable Episode Drawer -->
+                <div id="episodeDrawer"
+                     class="absolute top-0 right-0 bottom-[108px] z-40 w-72 lg:w-80 glass-panel border-l border-white/15 flex flex-col overflow-hidden transition-transform duration-300 ease-in-out transform translate-x-full shadow-2xl"
+                     aria-hidden="true">
+                    <div class="p-4 border-b border-white/10 flex items-center justify-between bg-black/20">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="list-video" class="w-4 h-4 text-cyan-400"></i>
+                            <h3 class="font-bold text-xs uppercase tracking-wider text-slate-200">Episódios</h3>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span id="playerEpCount" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">0 Eps</span>
+                            <button onclick="toggleEpisodeDrawer(false)"
+                                    class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition"
+                                    title="Fechar lista de episódios"
+                                    aria-label="Fechar lista de episódios">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="episodesListContainer" class="flex-1 overflow-y-auto p-3 space-y-2">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="shortcutsModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass-controls max-w-md w-full rounded-2xl p-6 border border-white/15 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="keyboard" class="w-5 h-5 text-cyan-400"></i>
+                    <h3 class="font-bold text-sm text-white">Atalhos do Teclado AuraPlay</h3>
+                </div>
+                <button id="closeShortcutsBtn" class="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="flex justify-between items-center p-2 rounded-lg bg-white/5 border border-white/5">
+                    <span class="text-slate-300">Play / Pause</span>
+                    <kbd class="px-2 py-0.5 rounded bg-deep-950 text-cyan-300 border border-cyan-500/30 font-mono">Espaço</kbd>
+                </div>
+                <div class="flex justify-between items-center p-2 rounded-lg bg-white/5 border border-white/5">
+                    <span class="text-slate-300">Tela Cheia</span>
+                    <kbd class="px-2 py-0.5 rounded bg-deep-950 text-cyan-300 border border-cyan-500/30 font-mono">F</kbd>
+                </div>
+                <div class="flex justify-between items-center p-2 rounded-lg bg-white/5 border border-white/5">
+                    <span class="text-slate-300">Mudar Mute</span>
+                    <kbd class="px-2 py-0.5 rounded bg-deep-950 text-cyan-300 border border-cyan-500/30 font-mono">M</kbd>
+                </div>
+                <div class="flex justify-between items-center p-2 rounded-lg bg-white/5 border border-white/5">
+                    <span class="text-slate-300">Avançar 5s</span>
+                    <kbd class="px-2 py-0.5 rounded bg-deep-950 text-cyan-300 border border-cyan-500/30 font-mono">→</kbd>
+                </div>
+                <div class="flex justify-between items-center p-2 rounded-lg bg-white/5 border border-white/5">
+                    <span class="text-slate-300">Voltar 5s</span>
+                    <kbd class="px-2 py-0.5 rounded bg-deep-950 text-cyan-300 border border-cyan-500/30 font-mono">←</kbd>
+                </div>
+                <div class="flex justify-between items-center p-2 rounded-lg bg-white/5 border border-white/5">
+                    <span class="text-slate-300">Aumentar Volume</span>
+                    <kbd class="px-2 py-0.5 rounded bg-deep-950 text-cyan-300 border border-cyan-500/30 font-mono font-bold">↑</kbd>
+                </div>
+            </div>
+            
+            <p class="text-[11px] text-slate-400 text-center pt-2">Pressione <kbd class="px-1.5 py-0.5 rounded bg-white/10 font-mono">ESC</kbd> para fechar</p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Complete Anime Catalog Database (API Mock Structure)
+        // Fixtures locais isoladas: nunca são usadas como fallback do catálogo de produção.
+        const DEVELOPMENT_FIXTURES = [
+            {
+                id: "1",
+                title: "Solo Leveling",
+                rating: "9.8",
+                tag: "LEGENDADO",
+                genres: ["Ação", "Fantasia", "Aventura"],
+                isFavorite: true,
+                isPopular: true,
+                isRecent: true,
+                poster: "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=600&auto=format&fit=crop",
+                banner: "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=1600&auto=format&fit=crop",
+                description: "Em um mundo onde portais conectam a Terra a dimensões repletas de monstros, caçadores despertam habilidades sobre-humanas. Sung Jinwoo descobre o segredo para evoluir sem limites.",
+                episodes: [
+                    { number: 1, title: "Episódio 01 • O Despertar", duration: "23:40", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" },
+                    { number: 2, title: "Episódio 02 • O Labirinto Duplo", duration: "24:10", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" },
+                    { number: 3, title: "Episódio 03 • Caçador de Classe E", duration: "22:50", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" }
+                ]
+            },
+            {
+                id: "2",
+                title: "Demon Slayer: Kimetsu no Yaiba",
+                rating: "9.7",
+                tag: "DUBLADO",
+                genres: ["Ação", "Fantasia"],
+                isFavorite: true,
+                isPopular: true,
+                isRecent: false,
+                poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop",
+                banner: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1600&auto=format&fit=crop",
+                description: "Tanjiro Kamado luta contra demônios para curar sua irmã Nezuko e vingar sua família em uma jornada repleta de espadas e poderes elementares impressionantes.",
+                episodes: [
+                    { number: 1, title: "Episódio 01 • Crueldade", duration: "24:15", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" },
+                    { number: 2, title: "Episódio 02 • O Treinador Sakonji", duration: "23:30", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" }
+                ]
+            },
+            {
+                id: "3",
+                title: "Jujutsu Kaisen",
+                rating: "9.6",
+                tag: "LEGENDADO",
+                genres: ["Ação", "Fantasia", "Sobrenatural"],
+                isFavorite: true,
+                isPopular: true,
+                isRecent: true,
+                poster: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop",
+                banner: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1600&auto=format&fit=crop",
+                description: "Yuji Itadori engole um amuleto amaldiçoado e torna-se hospedeiro de Sukuna. Ele junta-se à Escola Técnica de Jujutsu para combater maldições perigosas.",
+                episodes: [
+                    { number: 1, title: "Episódio 01 • Ryomen Sukuna", duration: "23:55", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+                    { number: 2, title: "Episódio 02 • Por Minha Própria Força", duration: "24:00", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" }
+                ]
+            },
+            {
+                id: "4",
+                title: "Cyberpunk: Edgerunners",
+                rating: "9.5",
+                tag: "DUBLADO",
+                genres: ["Sci-Fi", "Ação"],
+                isFavorite: false,
+                isPopular: true,
+                isRecent: false,
+                poster: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=600&auto=format&fit=crop",
+                banner: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1600&auto=format&fit=crop",
+                description: "Um jovem de rua tenta sobreviver em Night City, uma metrópole obcecada por tecnologia e modificação corporal, tornando-se um fora-da-lei conhecido como Edgerunner.",
+                episodes: [
+                    { number: 1, title: "Episódio 01 • Cidade de Luzes", duration: "24:00", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" }
+                ]
+            },
+            {
+                id: "5",
+                title: "Chainsaw Man",
+                rating: "9.4",
+                tag: "LEGENDADO",
+                genres: ["Ação", "Fantasia"],
+                isFavorite: false,
+                isPopular: false,
+                isRecent: true,
+                poster: "https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=600&auto=format&fit=crop",
+                banner: "https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=1600&auto=format&fit=crop",
+                description: "Denji é um jovem que vive com o Demônio da Motosserra, Pochita. Após uma traição, ele renasce como Chainsaw Man e entra para a Segurança Pública.",
+                episodes: [
+                    { number: 1, title: "Episódio 01 • Cão & Motosserra", duration: "23:50", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" }
+                ]
+            },
+            {
+                id: "test-player",
+                title: "Teste do Player",
+                rating: "Novo",
+                tag: "TESTE",
+                genres: ["Teste", "Áudio", "Vídeo"],
+                isFavorite: false,
+                isPopular: false,
+                isRecent: false,
+                poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=600&auto=format&fit=crop",
+                banner: "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=1600&auto=format&fit=crop",
+                description: "Dois episódios curtos, locais e com áudio para testar reprodução, volume, troca de episódio, tela cheia e Picture-in-Picture.",
+                episodes: [
+                    { number: 1, title: "Episódio 01 • Teste de Áudio e Vídeo", duration: "00:33", src: "__AURAPLAY_MEDIA_BASE_URL__media/auraplay-test-episode-01.mp4" },
+                    { number: 2, title: "Episódio 02 • Teste de Áudio e Vídeo", duration: "00:52", src: "__AURAPLAY_MEDIA_BASE_URL__media/auraplay-test-episode-02.mp4" }
+                ]
+            }
+        ];
+
+        let ANIME_DATABASE = [];
+        let homeSections = { featured: [], popularSeason: [], recentReleases: [] };
+
+        const FALLBACK_COVER = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+                <defs>
+                    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+                        <stop stop-color="#07111f"/><stop offset="0.55" stop-color="#0b2631"/><stop offset="1" stop-color="#063c3d"/>
+                    </linearGradient>
+                    <radialGradient id="glow"><stop stop-color="#22d3ee" stop-opacity=".36"/><stop offset="1" stop-color="#22d3ee" stop-opacity="0"/></radialGradient>
+                </defs>
+                <rect width="960" height="540" fill="url(#bg)"/><circle cx="480" cy="255" r="230" fill="url(#glow)"/>
+                <text x="480" y="260" text-anchor="middle" fill="#67e8f9" font-family="Segoe UI,Arial" font-size="62" font-weight="700" letter-spacing="10">AURAPLAY</text>
+                <text x="480" y="315" text-anchor="middle" fill="#94a3b8" font-family="Segoe UI,Arial" font-size="23" letter-spacing="5">CONTINUAR ASSISTINDO</text>
+            </svg>`)}`;
+
+        function applyImageFallback(image) {
+            if (image.dataset.fallbackApplied === 'true') return;
+            const secondary = image.dataset.fallback;
+            if (secondary) {
+                image.dataset.fallback = '';
+                image.src = secondary;
+                return;
+            }
+            image.dataset.fallbackApplied = 'true';
+            image.onerror = null;
+            image.src = FALLBACK_COVER;
+        }
+
+        document.addEventListener('error', event => {
+            if (event.target instanceof HTMLImageElement) applyImageFallback(event.target);
+        }, true);
+
+        const pendingApiRequests = new Map();
+        const activeApiChannels = new Map();
+        let apiRequestSequence = 0;
+
+        window.__auraplayReceiveApiResponse = response => {
+            const pending = pendingApiRequests.get(response?.requestId);
+            if (!pending) return;
+            pendingApiRequests.delete(response.requestId);
+            clearTimeout(pending.timer);
+            if (activeApiChannels.get(pending.channel) === response.requestId) activeApiChannels.delete(pending.channel);
+            if (response.success) pending.resolve(response.data);
+            else pending.reject(Object.assign(new Error(response.error?.message || 'Falha ao consultar a API.'), response.error || {}));
+        };
+
+        function requestAuraApi(endpoint, parameters = {}, channel = endpoint) {
+            if (!window.chrome?.webview?.postMessage) return Promise.reject(new Error('Ponte nativa da API indisponível.'));
+
+            const previousRequestId = activeApiChannels.get(channel);
+            if (previousRequestId) window.chrome.webview.postMessage({ type: 'api-cancel', requestId: previousRequestId });
+
+            const requestId = `${channel}-${Date.now()}-${++apiRequestSequence}`;
+            activeApiChannels.set(channel, requestId);
+            return new Promise((resolve, reject) => {
+                const timer = setTimeout(() => {
+                    pendingApiRequests.delete(requestId);
+                    if (activeApiChannels.get(channel) === requestId) activeApiChannels.delete(channel);
+                    window.chrome.webview.postMessage({ type: 'api-cancel', requestId });
+                    reject(Object.assign(new Error('A API excedeu o tempo limite.'), { code: 'timeout' }));
+                }, 25000);
+                pendingApiRequests.set(requestId, { resolve, reject, timer, channel });
+                window.chrome.webview.postMessage({ type: 'api-request', requestId, endpoint, ...parameters });
+            });
+        }
+
+		function cancelApiChannel(channel, diagnosticEvent = 'playback-cancelled') {
+			const requestId = activeApiChannels.get(channel);
+			if (!requestId) return;
+			activeApiChannels.delete(channel);
+			const pending = pendingApiRequests.get(requestId);
+			if (pending) {
+				pendingApiRequests.delete(requestId);
+				clearTimeout(pending.timer);
+				pending.reject(Object.assign(new Error('Operation cancelled.'), { code: 'cancelled' }));
+			}
+			window.chrome?.webview?.postMessage({ type: 'api-cancel', requestId });
+		}
+
+        let coverResizeCheckFrame = 0;
+        window.addEventListener('resize', () => {
+            cancelAnimationFrame(coverResizeCheckFrame);
+            coverResizeCheckFrame = requestAnimationFrame(() => {
+                document.querySelectorAll('.continue-cover-image').forEach(image => {
+                    if (image.complete && image.naturalWidth === 0) applyImageFallback(image);
+                });
+            });
+        });
+
+        // State Tracking
+        let currentAnime = ANIME_DATABASE[0];
+        let currentEpIndex = 0;
+        let activeGenreFilter = 'Todos';
+		let pendingViewAfterFullscreen = null;
+		let pendingNavigationRequest = null;
+		let selectedDetailsSeasonId = null;
+        let isEpisodeDrawerOpen = false;
+        let pendingResumeTime = null;
+        let lastHistorySaveAt = 0;
+        let isChangingEpisode = false;
+		let activeEpisodeSession = null;
+
+		// Diagnóstico temporário e estritamente observacional. Não intercepta eventos.
+		const ENABLE_GLOBAL_DIAGNOSTICS = true;
+		const globalDiagnosticSessionId = `ui-${Date.now().toString(36).slice(-8)}`;
+		let globalDiagnosticSequence = 0;
+		let diagnosticWindowState = 'normal';
+		const diagnosticActionById = Object.freeze({
+			navHome: 'navigate-home', navSearch: 'navigate-search', navSettings: 'navigate-settings',
+			playerBackBtn: 'navigate-back', detailsBackBtn: 'navigate-back', playPauseBtn: 'play-pause',
+			centerPlayBtn: 'play-pause', prevEpBtn: 'previous-episode', nextEpBtn: 'next-episode',
+			muteBtn: 'mute-volume', speedSelect: 'speed', subtitleSelect: 'subtitles',
+			fullscreenBtn: 'fullscreen', pipBtn: 'pip', pipRestoreBtn: 'pip-restore',
+			customPipRestoreBtn: 'pip-restore', episodeDrawerButton: 'episode-list',
+			windowMinimizeBtn: 'window-minimize', windowMaximizeBtn: 'window-maximize', windowCloseBtn: 'window-close'
+		});
+
+		function emitGlobalDiagnostic(event, details = {}) {
+			if (!ENABLE_GLOBAL_DIAGNOSTICS || !window.chrome?.webview?.postMessage) return;
+			try { window.chrome.webview.postMessage({ type: 'ui-diagnostic', event, sessionId: globalDiagnosticSessionId, ...details }); } catch {}
+		}
+
+		function readGlobalDiagnosticState(element, action, sequenceId, startedAt) {
+			let transitionPending = false;
+			let session = false;
+			let hls = false;
+			let changing = false;
+			try {
+				transitionPending = Boolean(playerExitPending || fullscreenTransitionPending || pipTransitionPending);
+				session = Boolean(activeEpisodeSession);
+				hls = Boolean(activeHls);
+				changing = Boolean(isChangingEpisode);
+			} catch {}
+			const drawer = document.getElementById('episodeDrawer');
+			const overlayPresent = Boolean(drawer && !drawer.classList.contains('hidden')) || document.querySelector('[role="dialog"]:not(.hidden)') !== null;
+			return {
+				sequenceId, action, elementId: element?.id || element?.dataset?.uiAction || element?.tagName?.toLowerCase() || 'unknown',
+				view: typeof viewNavigation === 'object' ? viewNavigation.currentView : 'unknown', targetView: element?.dataset?.targetView || 'none',
+				handlerFound: Boolean(element?.onclick || element?.getAttribute?.('onclick') || action !== 'unknown'), disabled: Boolean(element?.disabled),
+				pointerEvents: element ? getComputedStyle(element).pointerEvents : 'unknown', overlayPresent, transitionPending,
+				activeSession: session, activeHls: hls, isChangingEpisode: changing,
+				playerExitPending: Boolean(playerExitPending), fullscreenPending: Boolean(fullscreenTransitionPending), pipPending: Boolean(pipTransitionPending),
+				fullscreen: Boolean(document.fullscreenElement), pip: Boolean(document.body.classList.contains('pip-mode')),
+				windowState: diagnosticWindowState, elapsedMs: Math.max(0, Math.round(performance.now() - startedAt))
+			};
+		}
+
+		function observeGlobalUiAction(event) {
+			if (!ENABLE_GLOBAL_DIAGNOSTICS) return;
+			const element = event.target?.closest?.('button,select,input,[data-ui-action],[onclick]');
+			if (!element) return;
+			const action = element.dataset.uiAction || diagnosticActionById[element.id] ||
+				(element.classList.contains('genre-pill') ? 'search-filter' : element.type === 'range' ? 'slider' : 'ui-control');
+			if (action === 'window-minimize') diagnosticWindowState = 'minimized';
+			if (action === 'window-maximize') diagnosticWindowState = diagnosticWindowState === 'maximized' ? 'normal' : 'maximized';
+			const sequenceId = ++globalDiagnosticSequence;
+			const startedAt = performance.now();
+			const state = () => readGlobalDiagnosticState(element, action, sequenceId, startedAt);
+			emitGlobalDiagnostic('ui-action-requested', state());
+			emitGlobalDiagnostic('ui-action-start', state());
+			setTimeout(() => {
+				const current = state();
+				emitGlobalDiagnostic(current.elapsedMs >= 3000 ? 'ui-action-timeout' : 'ui-action-complete', current);
+			}, 0);
+		}
+
+		document.addEventListener('click', observeGlobalUiAction, { capture: true, passive: true });
+		document.addEventListener('change', observeGlobalUiAction, { capture: true, passive: true });
+		window.addEventListener('error', () => emitGlobalDiagnostic('ui-action-failed', { sequenceId: ++globalDiagnosticSequence, action: 'runtime', error: 'script-error' }));
+		window.addEventListener('unhandledrejection', () => emitGlobalDiagnostic('ui-action-failed', { sequenceId: ++globalDiagnosticSequence, action: 'runtime', error: 'promise-rejection' }));
+		let episodeSessionSequence = 0;
+		let playerEpisodes = [];
+        let lastHomeLoadedAt = 0;
+        let isHomeLoading = false;
+        const HOME_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+		const NATIVE_FAVORITES_BASE64 = "__AURAPLAY_FAVORITES_BASE64__";
+
+		function decodeNativeFavorites() {
+			if (!NATIVE_FAVORITES_BASE64 || NATIVE_FAVORITES_BASE64.startsWith('__')) return [];
+			try {
+				const binary = atob(NATIVE_FAVORITES_BASE64);
+				const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+				const parsed = JSON.parse(new TextDecoder().decode(bytes));
+				if (Array.isArray(parsed)) return parsed;
+				if (Array.isArray(parsed?.items)) return parsed.items;
+				if (parsed && typeof parsed === 'object') return Object.entries(parsed).map(([key, value]) =>
+					typeof value === 'object' && value !== null ? { animeId: value.animeId || value.id || key, ...value } : { animeId: key });
+			} catch (error) {
+				console.warn('Não foi possível carregar os favoritos locais.');
+			}
+			return [];
+		}
+
+		function normalizeFavoriteRecord(value) {
+			if (typeof value === 'string' || typeof value === 'number') return { animeId: String(value), addedAt: 0 };
+			if (!value || typeof value !== 'object') return null;
+			const animeId = String(value.animeId || value.id || '').trim();
+			if (!animeId) return null;
+			return {
+				animeId,
+				anilistId: value.anilistId ?? null,
+				malId: value.malId ?? null,
+				title: value.title || '',
+				coverUrl: value.coverUrl || value.poster || '',
+				bannerUrl: value.bannerUrl || value.banner || '',
+				averageScore: value.averageScore ?? value.rating ?? null,
+				publicEpisodeCount: Number.isFinite(Number(value.publicEpisodeCount)) ? Number(value.publicEpisodeCount) : null,
+				addedAt: Number(value.addedAt || 0)
+			};
+		}
+
+		const favoriteRecords = new Map();
+		decodeNativeFavorites().forEach(value => {
+			const record = normalizeFavoriteRecord(value);
+			if (record) favoriteRecords.set(record.animeId, record);
+		});
+		const favoriteAnimeIds = new Set(favoriteRecords.keys());
+
+		function persistFavorites() {
+			if (!window.chrome?.webview?.postMessage) return;
+			const json = JSON.stringify({ version: 1, items: [...favoriteRecords.values()] });
+			const bytes = new TextEncoder().encode(json);
+			let binary = '';
+			bytes.forEach(byte => binary += String.fromCharCode(byte));
+			window.chrome.webview.postMessage({ type: 'favorites-save', payload: btoa(binary) });
+		}
+
+		function favoriteRecordFromAnime(anime, existing = null) {
+			return {
+				animeId: String(anime.id),
+				anilistId: anime.anilistId ?? existing?.anilistId ?? null,
+				malId: anime.malId ?? existing?.malId ?? null,
+				title: anime.title || existing?.title || '',
+				coverUrl: anime.poster || existing?.coverUrl || '',
+				bannerUrl: anime.banner || existing?.bannerUrl || '',
+				averageScore: anime.averageScore ?? anime.rating ?? existing?.averageScore ?? null,
+				publicEpisodeCount: Number.isFinite(Number(anime.publicEpisodeCount)) ? Number(anime.publicEpisodeCount) : existing?.publicEpisodeCount ?? null,
+				addedAt: existing?.addedAt || Date.now()
+			};
+		}
+
+		function createViewNavigation(initialView = 'home') {
+			let currentView = initialView;
+			const entries = [];
+			return {
+				get currentView() { return currentView; },
+				get depth() { return entries.length; },
+				go(viewName, currentState = null) {
+					if (viewName === currentView) return false;
+					entries.push({ viewName: currentView, state: currentState });
+					currentView = viewName;
+					return true;
+				},
+				back() {
+					const entry = entries.pop() ?? null;
+					if (entry) currentView = entry.viewName;
+					return entry;
+				},
+				restore(viewName) { currentView = viewName; }
+			};
+		}
+
+		const viewNavigation = createViewNavigation('home');
+
+		function captureCurrentViewState() {
+			const viewName = viewNavigation.currentView;
+			const view = document.getElementById(`view${viewName.charAt(0).toUpperCase() + viewName.slice(1)}`);
+			const state = { scrollTop: view?.scrollTop ?? 0 };
+			if (viewName === 'search') {
+				state.query = document.getElementById('catalogSearchInput').value;
+				state.localPage = localSearchPage;
+				state.remotePage = remoteSearchPage;
+				state.genre = activeGenreFilter;
+			}
+			if (viewName === 'details') {
+				state.animeId = detailsAnimeId;
+				state.seasonId = selectedDetailsSeasonId;
+			}
+			return state;
+		}
+
+		function restoreViewState(viewName, state) {
+			if (!state) return;
+			if (viewName === 'search') {
+				document.getElementById('catalogSearchInput').value = state.query ?? '';
+				localSearchPage = state.localPage ?? localSearchPage;
+				remoteSearchPage = state.remotePage ?? remoteSearchPage;
+				activeGenreFilter = state.genre ?? activeGenreFilter;
+				renderSearchSnapshots();
+			}
+			if (viewName === 'details') {
+				detailsAnimeId = state.animeId ?? detailsAnimeId;
+				selectedDetailsSeasonId = state.seasonId ?? selectedDetailsSeasonId;
+			}
+			requestAnimationFrame(() => {
+				const view = document.getElementById(`view${viewName.charAt(0).toUpperCase() + viewName.slice(1)}`);
+				if (view) view.scrollTop = Number(state.scrollTop || 0);
+			});
+		}
+
+        function mapApiAnime(anime) {
+            const score = Number.isFinite(Number(anime?.averageScore)) ? Number(anime.averageScore) / 10 : null;
+			const existing = ANIME_DATABASE.find(candidate => String(candidate.id) === String(anime?.id));
+            return {
+                id: anime?.id,
+                anilistId: anime?.anilistId ?? null,
+                malId: anime?.malId ?? null,
+                title: anime?.title || 'Título indisponível',
+                alternativeTitles: anime?.alternativeTitles ?? [],
+                poster: anime?.coverUrl || FALLBACK_COVER,
+                banner: anime?.bannerUrl || anime?.coverUrl || FALLBACK_COVER,
+                rating: score === null ? '—' : score.toFixed(1),
+				averageScore: anime?.averageScore ?? null,
+				genres: anime?.genres ?? existing?.genres ?? [],
+                description: anime?.description || '',
+                availableEpisodeCount: Number(anime?.availableEpisodeCount ?? 0),
+				publicEpisodeCount: Number.isFinite(Number(anime?.publicEpisodeCount)) ? Number(anime.publicEpisodeCount) : existing?.publicEpisodeCount ?? null,
+                expectedEpisodeCount: anime?.expectedEpisodeCount ?? null,
+                playbackStatus: anime?.playbackStatus || 'METADATA_ONLY',
+                nextEpisode: anime?.nextEpisode ?? null,
+                isFavorite: favoriteAnimeIds.has(anime?.id),
+                apiManaged: true,
+                episodes: []
+            };
+        }
+
+        function showHomeApiStatus(mode, message = '') {
+            const status = document.getElementById('homeApiStatus');
+            const spinner = document.getElementById('homeApiSpinner');
+            const retry = document.getElementById('homeApiRetryBtn');
+            const text = document.getElementById('homeApiStatusText');
+            status.classList.toggle('hidden', mode === 'hidden');
+            status.classList.toggle('flex', mode !== 'hidden');
+            spinner.classList.toggle('hidden', mode !== 'loading');
+            retry.classList.toggle('hidden', mode !== 'error');
+            text.textContent = message || (mode === 'loading' ? 'Carregando catálogo...' : 'Não foi possível atualizar a Home.');
+        }
+
+        async function loadHomeFromApi(force = false) {
+            if (isHomeLoading) return;
+            if (!force && lastHomeLoadedAt && Date.now() - lastHomeLoadedAt < HOME_REFRESH_INTERVAL_MS) return;
+            isHomeLoading = true;
+            if (!lastHomeLoadedAt) showHomeApiStatus('loading');
+            try {
+                const response = await requestAuraApi('home', {}, 'home');
+                homeSections = {
+                    featured: (response?.featured ?? []).map(mapApiAnime),
+                    popularSeason: (response?.popularSeason ?? []).map(mapApiAnime),
+                    recentReleases: (response?.recentReleases ?? []).map(mapApiAnime)
+                };
+                const uniqueAnime = new Map();
+                [...homeSections.featured, ...homeSections.popularSeason, ...homeSections.recentReleases]
+                    .forEach(anime => { if (anime.id && !uniqueAnime.has(anime.id)) uniqueAnime.set(anime.id, anime); });
+                ANIME_DATABASE = [...uniqueAnime.values()];
+				reconcileFavoriteRecords();
+                currentAnime = currentAnime?.apiManaged ? ANIME_DATABASE.find(anime => anime.id === currentAnime.id) ?? currentAnime : currentAnime;
+                lastHomeLoadedAt = Date.now();
+                showHomeApiStatus('hidden');
+                renderHomeView();
+				hydratePersistedFavorites();
+            } catch (error) {
+                console.warn('Falha ao carregar Home da API:', error);
+                if (!lastHomeLoadedAt) showHomeApiStatus('error', error.message);
+                else showToast('Não foi possível atualizar a Home. Exibindo os últimos dados em memória.');
+            } finally {
+                isHomeLoading = false;
+            }
+        }
+
+        document.getElementById('homeApiRetryBtn').addEventListener('click', () => loadHomeFromApi(true));
+
+		function resolveFavoriteAnime(record) {
+			return ANIME_DATABASE.find(anime => String(anime.id) === String(record.animeId))
+				?? ANIME_DATABASE.find(anime => record.anilistId && Number(anime.anilistId) === Number(record.anilistId))
+				?? ANIME_DATABASE.find(anime => record.malId && Number(anime.malId) === Number(record.malId))
+				?? ANIME_DATABASE.find(anime => record.title && normalizeHistoryIdentity(anime.title) === normalizeHistoryIdentity(record.title))
+				?? null;
+		}
+
+		function reconcileFavoriteRecords() {
+			let changed = false;
+			for (const [storedId, record] of [...favoriteRecords.entries()]) {
+				const anime = resolveFavoriteAnime(record);
+				if (!anime) continue;
+				const updated = favoriteRecordFromAnime(anime, record);
+				if (storedId !== String(anime.id)) {
+					favoriteRecords.delete(storedId);
+					favoriteAnimeIds.delete(storedId);
+				}
+				favoriteRecords.set(String(anime.id), updated);
+				favoriteAnimeIds.add(String(anime.id));
+				anime.isFavorite = true;
+				changed = true;
+			}
+			if (changed) persistFavorites();
+		}
+
+		function getPublicEpisodeCount(anime) {
+			return Number.isFinite(Number(anime?.publicEpisodeCount))
+				? Number(anime.publicEpisodeCount)
+				: Number(anime?.availableEpisodeCount ?? anime?.episodes?.length ?? 0);
+		}
+
+		function getFavoriteAnimes() {
+			return [...favoriteRecords.values()].map(record => {
+				const anime = resolveFavoriteAnime(record);
+				if (anime) return anime;
+				const score = Number(record.averageScore);
+				return {
+					id: record.animeId,
+					anilistId: record.anilistId,
+					malId: record.malId,
+					title: record.title || 'Anime favorito',
+					poster: record.coverUrl || FALLBACK_COVER,
+					banner: record.bannerUrl || record.coverUrl || FALLBACK_COVER,
+					rating: Number.isFinite(score) ? (score > 10 ? score / 10 : score).toFixed(1) : '—',
+					averageScore: record.averageScore,
+					publicEpisodeCount: record.publicEpisodeCount,
+					availableEpisodeCount: record.publicEpisodeCount ?? 0,
+					genres: [], isFavorite: true, apiManaged: isApiUuid(record.animeId), episodes: []
+				};
+			});
+		}
+
+		function propagatePublicEpisodeCount(animeId, publicEpisodeCount) {
+			const update = anime => {
+				if (anime && String(anime.id) === String(animeId)) anime.publicEpisodeCount = publicEpisodeCount;
+			};
+			ANIME_DATABASE.forEach(update);
+			Object.values(homeSections).flat().forEach(update);
+			if (typeof lastLocalSearchItems !== 'undefined') lastLocalSearchItems.forEach(update);
+			update(currentAnime);
+			const favorite = favoriteRecords.get(String(animeId));
+			if (favorite) {
+				favorite.publicEpisodeCount = publicEpisodeCount;
+				persistFavorites();
+			}
+		}
+
+		let favoritesHydrationRunning = false;
+		async function hydratePersistedFavorites() {
+			if (favoritesHydrationRunning) return;
+			favoritesHydrationRunning = true;
+			try {
+				for (const record of favoriteRecords.values()) {
+					const anime = resolveFavoriteAnime(record);
+					const catalogId = anime?.id || (isApiUuid(record.animeId) ? record.animeId : null);
+					if (!catalogId) continue;
+					try {
+						const [details, episodesResponse] = await Promise.all([
+							requestAuraApi('anime', { animeId: catalogId }, `favorite-anime-${catalogId}`),
+							requestAuraApi('episodes', { animeId: catalogId }, `favorite-episodes-${catalogId}`)
+						]);
+						const publicEpisodeCount = (episodesResponse.seasons ?? []).reduce((total, season) => total + (season.episodes?.length ?? 0), 0);
+						const mapped = mapApiAnime(details);
+						mapped.genres = details.genres ?? [];
+						mapped.publicEpisodeCount = publicEpisodeCount;
+						const existing = ANIME_DATABASE.find(candidate => candidate.id === catalogId);
+						if (existing) Object.assign(existing, mapped);
+						favoriteRecords.set(String(catalogId), favoriteRecordFromAnime(mapped, record));
+						propagatePublicEpisodeCount(catalogId, publicEpisodeCount);
+					} catch (error) {
+						if (error.code !== 'cancelled') console.warn('Não foi possível atualizar um favorito salvo.');
+					}
+				}
+				persistFavorites();
+				if (!document.getElementById('viewHome').classList.contains('hidden')) renderHomeView();
+			} finally {
+				favoritesHydrationRunning = false;
+			}
+		}
+
+        const HISTORY_SAVE_INTERVAL_MS = 2000;
+        const COMPLETION_THRESHOLD = 0.9;
+        const NATIVE_WATCH_HISTORY_BASE64 = "__AURAPLAY_WATCH_HISTORY_BASE64__";
+		const LEGACY_HISTORY_TITLES = Object.freeze({
+			'1': 'Solo Leveling',
+			'2': 'Demon Slayer: Kimetsu no Yaiba',
+			'3': 'Jujutsu Kaisen',
+			'4': 'Cyberpunk: Edgerunners',
+			'5': 'Chainsaw Man',
+			'test-player': 'Teste do Player'
+		});
+
+		function normalizeHistoryIdentity(value) {
+			return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]+/g, ' ').trim();
+		}
+
+		function historyIdentityValues(item) {
+			return [...new Set([item?.catalogId, item?.sourceAnimeId, item?.animeId].filter(Boolean).map(String))];
+		}
+
+		function isApiUuid(value) {
+			return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
+		}
+
+		function getHistoryTitle(item) {
+			if (item?.animeTitle) return item.animeTitle;
+			for (const identity of historyIdentityValues(item)) {
+				if (LEGACY_HISTORY_TITLES[identity]) return LEGACY_HISTORY_TITLES[identity];
+			}
+			return '';
+		}
+
+		function resolveHistoryAnime(item) {
+			const identities = new Set(historyIdentityValues(item));
+			const directMatch = ANIME_DATABASE.find(anime => identities.has(String(anime.id)));
+			if (directMatch) return directMatch;
+
+			const normalizedTitle = normalizeHistoryIdentity(getHistoryTitle(item));
+			if (!normalizedTitle) return null;
+			return ANIME_DATABASE.find(anime => [anime.title, ...(anime.alternativeTitles ?? [])]
+				.some(title => normalizeHistoryIdentity(title) === normalizedTitle)) ?? null;
+		}
+
+		function resolveHistoryEpisode(anime, item) {
+			if (!anime?.episodes?.length) return null;
+			const episodeId = String(item?.episodeId || '');
+			const byId = episodeId ? anime.episodes.find(episode => String(episode.id || '') === episodeId) : null;
+			if (byId) return byId;
+
+			const episodeNumber = Number(item?.episodeNumber);
+			const seasonId = item?.seasonId ? String(item.seasonId) : null;
+			const byNumber = Number.isFinite(episodeNumber)
+				? anime.episodes.find(episode => Number(episode.number) === episodeNumber && (!seasonId || !episode.seasonId || String(episode.seasonId) === seasonId))
+				: null;
+			if (byNumber) return byNumber;
+
+			const epIndex = Number(item?.epIndex);
+			return Number.isInteger(epIndex) && epIndex >= 0 ? anime.episodes[epIndex] ?? null : null;
+		}
+
+		function createHistoryAnimeSnapshot(item) {
+			const catalogId = historyIdentityValues(item).find(isApiUuid);
+			const title = getHistoryTitle(item);
+			if (!catalogId && !title) return null;
+			return {
+				id: catalogId || String(item.animeId || item.catalogId || item.sourceAnimeId),
+				title: title || 'Anime salvo', alternativeTitles: [],
+				poster: item.animePoster || FALLBACK_COVER,
+				banner: item.animeBanner || item.animePoster || FALLBACK_COVER,
+				apiManaged: Boolean(catalogId), episodes: []
+			};
+		}
+
+		function deduplicateHistoryItems() {
+			const newestByIdentity = new Map();
+			Object.values(continueWatching).forEach(item => {
+				if (!item || typeof item !== 'object') return;
+				const anime = resolveHistoryAnime(item);
+				const identity = anime?.id || historyIdentityValues(item).find(isApiUuid) || normalizeHistoryIdentity(getHistoryTitle(item)) || historyIdentityValues(item)[0];
+				if (!identity) return;
+				const previous = newestByIdentity.get(identity);
+				if (!previous || Number(item.lastPlayedAt || 0) > Number(previous.lastPlayedAt || 0)) newestByIdentity.set(identity, item);
+			});
+			return [...newestByIdentity.values()];
+		}
+
+        function decodeNativeWatchHistory() {
+            if (!NATIVE_WATCH_HISTORY_BASE64 || NATIVE_WATCH_HISTORY_BASE64.startsWith('__')) return {};
+
+            try {
+                const binary = atob(NATIVE_WATCH_HISTORY_BASE64);
+                const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+                const parsed = JSON.parse(new TextDecoder().decode(bytes));
+                return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+            } catch (error) {
+                console.warn('Não foi possível carregar o histórico de reprodução:', error);
+                return {};
+            }
+        }
+
+        function encodeHistoryPayload(value) {
+            const bytes = new TextEncoder().encode(JSON.stringify(value));
+            let binary = '';
+            bytes.forEach(byte => binary += String.fromCharCode(byte));
+            return btoa(binary);
+        }
+
+        let continueWatching = decodeNativeWatchHistory();
+
+        function persistContinueWatching() {
+            try {
+                const payload = encodeHistoryPayload(continueWatching);
+                if (window.chrome?.webview?.postMessage) {
+                    window.chrome.webview.postMessage({ type: 'history-save', payload });
+                }
+            } catch (error) {
+                console.warn('Não foi possível salvar o histórico de reprodução:', error);
+            }
+        }
+
+		function clearNativePlaybackHeaders() {
+			if (window.chrome?.webview?.postMessage) {
+				window.chrome.webview.postMessage({ type: 'playback-clear' });
+			}
+		}
+
+		function reportPlaybackDiagnostic(eventName, mediaErrorCode = 0) {
+			if (!window.chrome?.webview?.postMessage) return;
+			const hlsSupport = video.canPlayType('application/vnd.apple.mpegurl') || 'none';
+			const alternateHlsSupport = video.canPlayType('application/x-mpegURL') || 'none';
+			window.chrome.webview.postMessage({
+				type: 'playback-diagnostic',
+				event: eventName,
+				mediaErrorCode: Number(mediaErrorCode || 0),
+				hlsSupport,
+				alternateHlsSupport,
+				mediaErrorMessage: video.error?.message || '',
+				readyState: video.readyState,
+				networkState: video.networkState,
+				currentSrcPresent: Boolean(video.currentSrc)
+			});
+		}
+
+		let activeHls = null;
+		let activePlaybackEngine = 'none';
+		let hlsMediaRecoveryAttempts = 0;
+		let hlsForbiddenErrors = 0;
+		let hlsPlaybackCounters = { playlists: 0, fragments: 0, networkErrors: 0, mediaErrors: 0 };
+		const pendingPlaybackScopes = new Map();
+		let playbackScopeSequence = 0;
+
+		function requestPlaybackScope(sessionId, context) {
+			if (!window.chrome?.webview?.postMessage || !sessionId || typeof context?.url !== 'string') {
+				return Promise.reject(new Error('Escopo transitório indisponível.'));
+			}
+			const receivedResourceKind = String(context.type || (context.part ? 'part-context' : context.keyInfo ? 'key-context' : context.frag ? 'frag-context' : 'unknown'));
+			const resourceKind = normalizeHlsResourceKind(context);
+			const originalReference = typeof context.frag?.relurl === 'string' ? context.frag.relurl : context.url;
+			const usesRelativeUrl = !/^[a-z][a-z0-9+.-]*:/i.test(originalReference);
+			const requestId = `scope-${Date.now()}-${++playbackScopeSequence}`;
+			return new Promise((resolve, reject) => {
+				const timer = setTimeout(() => {
+					pendingPlaybackScopes.delete(requestId);
+					reject(new Error('Preparação segura do fragmento expirou.'));
+				}, 4000);
+				pendingPlaybackScopes.set(requestId, { resolve, reject, timer });
+				window.chrome.webview.postMessage({
+					type: 'playback-scope-prepare',
+					requestId,
+					sessionId,
+					resourceKind,
+					receivedResourceKind,
+					url: context.url,
+					usesRelativeUrl
+				});
+			});
+		}
+
+		function normalizeHlsResourceKind(context) {
+			if (context?.part) return 'part';
+			if (context?.keyInfo) return 'key';
+			if (context?.frag) return 'fragment';
+			const aliases = {
+				manifest: 'manifest', level: 'level', audioTrack: 'audioTrack',
+				fragment: 'fragment', frag: 'fragment', part: 'part', key: 'key',
+				subtitle: 'subtitle', subtitleTrack: 'subtitleTrack'
+			};
+			return aliases[String(context?.type || '')] || 'unknown';
+		}
+
+		function cancelPendingPlaybackScopes() {
+			for (const pending of pendingPlaybackScopes.values()) {
+				clearTimeout(pending.timer);
+				pending.reject(new Error('Sessão de playback encerrada.'));
+			}
+			pendingPlaybackScopes.clear();
+		}
+
+		function createScopeAwareLoader(sessionId) {
+			const BaseLoader = window.Hls.DefaultConfig.loader;
+			return class ScopeAwareHlsLoader extends BaseLoader {
+				constructor(config) {
+					super(config);
+					this.scopeCancelled = false;
+				}
+
+				load(context, config, callbacks) {
+					requestPlaybackScope(sessionId, context).then(() => {
+						if (!this.scopeCancelled) super.load(context, config, callbacks);
+					}).catch(() => {
+						if (!this.scopeCancelled) callbacks.onError({ code: 0, text: 'playbackScopeRejected' }, context, null);
+					});
+				}
+
+				abort() {
+					this.scopeCancelled = true;
+					super.abort();
+				}
+
+				destroy() {
+					this.scopeCancelled = true;
+					super.destroy();
+				}
+			};
+		}
+
+		function reportHlsDiagnostic(action, data = {}) {
+			if (!window.chrome?.webview?.postMessage) return;
+			window.chrome.webview.postMessage({
+				type: 'playback-diagnostic',
+				event: 'hlsjs-event',
+				action,
+				errorType: String(data.errorType || ''),
+				details: String(data.details || ''),
+				fatal: Boolean(data.fatal),
+				status: Number(data.status || 0),
+				phase: String(data.phase || ''),
+				playlists: hlsPlaybackCounters.playlists,
+				fragments: hlsPlaybackCounters.fragments,
+				networkErrors: hlsPlaybackCounters.networkErrors,
+				mediaErrors: hlsPlaybackCounters.mediaErrors,
+				recoveryAttempts: hlsMediaRecoveryAttempts
+			});
+		}
+
+		function isHlsPlaybackSource(playback) {
+			const mime = String(playback?.mimeType || playback?.type || '').toLowerCase();
+			if (mime === 'hls' || mime.includes('mpegurl')) return true;
+			try {
+				return new URL(playback?.url || '').pathname.toLowerCase().endsWith('.m3u8');
+			} catch {
+				return false;
+			}
+		}
+
+		function cleanupPlaybackEngine(clearSource = true) {
+			const previousEngine = activePlaybackEngine;
+			cancelPendingPlaybackScopes();
+			if (activeHls) {
+				try { activeHls.stopLoad(); } catch {}
+				try { activeHls.detachMedia(); } catch {}
+				try { activeHls.destroy(); } catch {}
+				activeHls = null;
+			}
+			activePlaybackEngine = 'none';
+			if (clearSource) {
+				video.pause();
+				video.removeAttribute('src');
+				video.load();
+			}
+			if (previousEngine !== 'none') reportHlsDiagnostic('playback-cleanup', { phase: previousEngine });
+		}
+
+		function cancelActiveEpisodeSession(reason = 'playback-cancelled') {
+			const session = activeEpisodeSession;
+			if (session) session.cancelled = true;
+			activeEpisodeSession = null;
+			cancelApiChannel('playback', reason);
+			if (session) reportPlaybackDiagnostic(reason);
+			cleanupPlaybackEngine(true);
+			clearNativePlaybackHeaders();
+			isChangingEpisode = false;
+			pendingResumeTime = null;
+		}
+
+		function isCurrentEpisodeSession(session) {
+			return Boolean(session) && !session.cancelled && activeEpisodeSession === session &&
+				String(currentAnime?.id || '') === session.animeId &&
+				session.episodes.includes(session.episode) &&
+				String(session.episode?.id || '') === session.episodeId &&
+				viewNavigation.currentView === 'player';
+		}
+
+		function startHlsJsPlayback(playback) {
+			return new Promise((resolve, reject) => {
+				const supported = typeof window.Hls === 'function' && window.Hls.isSupported();
+				reportHlsDiagnostic('hlsjs-supported', { details: String(supported) });
+				if (!supported) {
+					reject(new Error('hls.js não é suportado neste WebView2.'));
+					return;
+				}
+
+				activePlaybackEngine = 'hlsjs';
+				hlsMediaRecoveryAttempts = 0;
+				hlsForbiddenErrors = 0;
+				hlsPlaybackCounters = { playlists: 0, fragments: 0, networkErrors: 0, mediaErrors: 0 };
+				const hls = new window.Hls({ loader: createScopeAwareLoader(playback.clientSessionId) });
+				activeHls = hls;
+				reportHlsDiagnostic('playback-engine-selected', { phase: 'hlsjs' });
+				reportHlsDiagnostic('hlsjs-instance-created');
+
+				let settled = false;
+				const fail = message => {
+					if (!settled) {
+						settled = true;
+						reject(new Error(message));
+					}
+				};
+
+				hls.on(window.Hls.Events.MEDIA_ATTACHED, () => {
+					reportHlsDiagnostic('media-attached');
+					hls.loadSource(playback.url);
+				});
+				hls.on(window.Hls.Events.MANIFEST_LOADING, () => reportHlsDiagnostic('manifest-loading'));
+				hls.on(window.Hls.Events.MANIFEST_LOADED, () => {
+					hlsPlaybackCounters.playlists++;
+					reportHlsDiagnostic('manifest-loaded');
+				});
+				hls.on(window.Hls.Events.MANIFEST_PARSED, (_, data) => {
+					reportHlsDiagnostic('manifest-parsed', { details: `levels-${data?.levels?.length || 0};audio-${data?.audioTracks?.length || 0};subtitles-${data?.subtitleTracks?.length || 0}` });
+					video.play().then(() => {
+						reportHlsDiagnostic('playback-playing');
+						if (!settled) { settled = true; resolve(); }
+					}).catch(() => {
+						updatePlayState(false);
+						if (!settled) { settled = true; resolve(); }
+					});
+				});
+				hls.on(window.Hls.Events.LEVEL_LOADING, () => reportHlsDiagnostic('level-loading'));
+				hls.on(window.Hls.Events.LEVEL_LOADED, () => {
+					hlsPlaybackCounters.playlists++;
+					reportHlsDiagnostic('level-loaded');
+				});
+				hls.on(window.Hls.Events.FRAG_LOADING, () => reportHlsDiagnostic('fragment-loading'));
+				hls.on(window.Hls.Events.FRAG_LOADED, () => {
+					hlsPlaybackCounters.fragments++;
+					reportHlsDiagnostic('fragment-loaded');
+				});
+				hls.on(window.Hls.Events.ERROR, (_, data) => {
+					if (data?.type === window.Hls.ErrorTypes.NETWORK_ERROR) hlsPlaybackCounters.networkErrors++;
+					if (data?.type === window.Hls.ErrorTypes.MEDIA_ERROR) hlsPlaybackCounters.mediaErrors++;
+					if (Number(data?.response?.code) === 403) hlsForbiddenErrors++;
+					reportHlsDiagnostic('hlsjs-error', {
+						errorType: data?.type,
+						details: data?.details,
+						fatal: data?.fatal,
+						status: data?.response?.code,
+						phase: data?.type
+					});
+
+					if (hlsForbiddenErrors >= 3) {
+						cleanupPlaybackEngine(true);
+						clearNativePlaybackHeaders();
+						fail('A fonte recusou os fragmentos após a preparação segura.');
+						showToast('A fonte recusou os fragmentos de vídeo.');
+						return;
+					}
+					if (data?.type === window.Hls.ErrorTypes.MEDIA_ERROR && hlsMediaRecoveryAttempts < 1) {
+						hlsMediaRecoveryAttempts++;
+						reportHlsDiagnostic('media-recovery-attempt');
+						hls.recoverMediaError();
+						return;
+					}
+					if (data?.fatal) {
+						cleanupPlaybackEngine(true);
+						clearNativePlaybackHeaders();
+						fail('Não foi possível reproduzir esta fonte HLS.');
+						showToast('Fonte HLS incompatível com o player atual.');
+					}
+				});
+				hls.attachMedia(video);
+			});
+		}
+
+		async function startPlaybackEngine(playback) {
+			cleanupPlaybackEngine(true);
+			reportMseCapabilities();
+			if (isHlsPlaybackSource(playback)) {
+				const hlsSupported = typeof window.Hls === 'function' && window.Hls.isSupported();
+				if (hlsSupported) return startHlsJsPlayback(playback);
+				const nativeSupport = video.canPlayType('application/vnd.apple.mpegurl');
+				reportHlsDiagnostic('hlsjs-supported', { details: 'false' });
+				if (!nativeSupport) throw new Error('HLS não é suportado neste WebView2.');
+			}
+
+			activePlaybackEngine = 'native';
+			reportHlsDiagnostic('playback-engine-selected', { phase: 'native' });
+			video.src = playback.url;
+			reportPlaybackDiagnostic('source-assigned');
+			video.load();
+			reportPlaybackDiagnostic('load-called');
+			reportPlaybackDiagnostic('play-requested');
+			await video.play();
+		}
+
+		function reportMseCapabilities() {
+			if (!window.chrome?.webview?.postMessage) return;
+			window.chrome.webview.postMessage({
+				type: 'playback-diagnostic',
+				event: 'mse-capabilities',
+				mediaSourceType: typeof window.MediaSource,
+				mediaSourcePresent: Boolean(window.MediaSource),
+				isTypeSupportedPresent: typeof window.MediaSource?.isTypeSupported === 'function',
+				sourceBufferPresent: Boolean(window.SourceBuffer),
+				managedMediaSourcePresent: Boolean(window.ManagedMediaSource),
+				runtime: navigator.userAgent || ''
+			});
+		}
+
+		if (window.chrome?.webview?.addEventListener) {
+			window.chrome.webview.addEventListener('message', event => {
+				if (event.data?.type === 'window-command-result') {
+					const pending = pendingWindowCommands.get(event.data.commandId);
+					if (!pending) return;
+					pendingWindowCommands.delete(event.data.commandId);
+					clearTimeout(pending.timer);
+					windowCommandPending = pendingWindowCommands.size > 0;
+					if (event.data.success) {
+						reportPlayerLifecycle('window-command-complete', { nativeCommand: pending.action, restoreSucceeded: true });
+						if (pending.action === 'minimize' || pending.action === 'maximize') {
+							const preserved = activeEpisodeSession === pending.preservedSession && activeHls === pending.preservedHls;
+							reportPlayerLifecycle(preserved ? 'window-session-preserved' : 'unexpected-playback-cleanup', { nativeCommand: pending.action, restoreSucceeded: preserved });
+						}
+						pending.resolve();
+					} else {
+						reportPlayerLifecycle('window-command-failed', { nativeCommand: pending.action });
+						pending.reject(new Error('Comando de janela rejeitado.'));
+					}
+					return;
+				}
+				if (event.data?.type === 'playback-scope-ready') {
+					const pending = pendingPlaybackScopes.get(event.data.requestId);
+					if (!pending) return;
+					pendingPlaybackScopes.delete(event.data.requestId);
+					clearTimeout(pending.timer);
+					if (event.data.success) pending.resolve();
+					else pending.reject(new Error('Escopo de playback rejeitado.'));
+					return;
+				}
+				if (event.data?.type !== 'playback-codec-probe' || !Array.isArray(event.data.probes)) return;
+				for (const probe of event.data.probes) {
+					const mime = typeof probe?.mime === 'string' ? probe.mime : '';
+					const codec = typeof probe?.codec === 'string' ? probe.codec : '';
+					if (!mime || !codec) continue;
+					const mediaType = `${mime}; codecs="${codec}"`;
+					const supported = typeof window.MediaSource?.isTypeSupported === 'function'
+						? window.MediaSource.isTypeSupported(mediaType)
+						: false;
+					window.chrome.webview.postMessage({
+						type: 'playback-diagnostic',
+						event: 'mse-codec-support',
+						mime,
+						codec,
+						supported
+					});
+				}
+			});
+		}
+
+        function toggleEpisodeDrawer(forceState = null) {
+            const drawer = document.getElementById('episodeDrawer');
+            const button = document.getElementById('episodeDrawerButton');
+            isEpisodeDrawerOpen = forceState === null ? !isEpisodeDrawerOpen : forceState;
+
+            drawer.classList.toggle('translate-x-full', !isEpisodeDrawerOpen);
+            drawer.classList.toggle('translate-x-0', isEpisodeDrawerOpen);
+            drawer.setAttribute('aria-hidden', String(!isEpisodeDrawerOpen));
+            button.setAttribute('aria-expanded', String(isEpisodeDrawerOpen));
+
+            if (document.fullscreenElement === document.getElementById('viewPlayer')) {
+                showFullscreenUi(false);
+                showFullscreenControls(false);
+            }
+        }
+
+        // View Navigation Switcher
+		function switchNav(viewName, options = {}) {
+			const transition = { viewName, push: options.push !== false, restoreState: options.restoreState ?? null };
+			if (viewName !== 'player' && viewNavigation.currentView === 'player') {
+				if (playerExitPending) {
+					pendingNavigationRequest = transition;
+					reportPlayerLifecycle('navigation-deferred', { navigationTarget: viewName });
+					return;
+				}
+				requestPlayerExit(transition, false);
+                return;
+			}
+
+			applyViewSwitch(viewName, transition);
+        }
+
+		function navigateBack() {
+			if (viewNavigation.currentView === 'player') {
+				reportPlayerLifecycle('player-back-requested', { navigationTarget: 'details' });
+				if (playerExitPending) {
+					pendingNavigationRequest = { useHistoryBack: true };
+					reportPlayerLifecycle('navigation-deferred', { navigationTarget: 'details' });
+					return;
+				}
+				requestPlayerExit(null, true);
+				return;
+			}
+			const entry = viewNavigation.back();
+			if (entry) switchNav(entry.viewName, { push: false, restoreState: entry.state });
+			else switchNav('home', { push: false });
+		}
+
+		function requestPlayerExit(explicitTransition = null, useHistoryBack = false) {
+			if (playerExitPending && playerExitPromise) return playerExitPromise;
+			playerExitPending = true;
+			reportPlayerLifecycle('player-exit-promise-created', { navigationTarget: explicitTransition?.viewName || (useHistoryBack ? 'details' : 'none') });
+			playerExitPromise = (async () => {
+				reportPlayerLifecycle('player-exit-transition-start', { navigationTarget: explicitTransition?.viewName || 'details' });
+				try {
+					if (document.fullscreenElement) {
+						pendingViewAfterFullscreen = explicitTransition || { useHistoryBack: true };
+						fullscreenTransitionPending = true;
+						await document.exitFullscreen();
+						await signalNativeWindow('fullscreen-exit');
+						pendingViewAfterFullscreen = null;
+						fullscreenTransitionPending = false;
+					}
+					if (isCustomPipActive) {
+						pendingViewAfterPiP = explicitTransition || { useHistoryBack: true };
+						await setCustomPictureInPicture(false, true);
+						pendingViewAfterPiP = null;
+					}
+					reportPlayerLifecycle('player-exit-mode-cleared', { navigationTarget: explicitTransition?.viewName || 'details', restoreSucceeded: true });
+					cleanupInProgress = true;
+					playerBackCleanupCount++;
+					reportPlayerLifecycle('player-back-cleanup-start', { navigationTarget: explicitTransition?.viewName || 'details' });
+					let transition = explicitTransition;
+					if (useHistoryBack) {
+						const entry = viewNavigation.back();
+						transition = entry ? { viewName: entry.viewName, push: false, restoreState: entry.state } : { viewName: 'home', push: false };
+					}
+					transition ||= { viewName: 'details', push: false };
+					applyViewSwitch(transition.viewName, transition);
+					document.body.classList.remove('pip-mode');
+					viewPlayer.classList.remove('controls-visible', 'ui-visible');
+					document.getElementById('viewDetails')?.classList.remove('pointer-events-none');
+					reportPlayerLifecycle('player-back-cleanup-complete', { navigationTarget: transition.viewName, restoreSucceeded: true });
+					reportPlayerLifecycle('details-clicks-restored', { navigationTarget: transition.viewName, restoreSucceeded: true });
+				} finally {
+					const deferredNavigation = pendingNavigationRequest;
+					pendingNavigationRequest = null;
+					pendingViewAfterFullscreen = null;
+					pendingViewAfterPiP = null;
+					fullscreenTransitionPending = false;
+					pipTransitionPending = false;
+					playerExitPending = false;
+					cleanupInProgress = false;
+					isChangingEpisode = false;
+					pendingResumeTime = null;
+					playerExitPromise = null;
+					reportPlayerLifecycle('player-exit-promise-cleared', { navigationTarget: deferredNavigation?.viewName || 'none', restoreSucceeded: true });
+					if (deferredNavigation) {
+						reportPlayerLifecycle('navigation-resumed', { navigationTarget: deferredNavigation.viewName || 'details' });
+						setTimeout(() => {
+							if (deferredNavigation.useHistoryBack) navigateBack();
+							else applyViewSwitch(deferredNavigation.viewName, deferredNavigation);
+						}, 0);
+					}
+				}
+			})();
+			return playerExitPromise;
+		}
+
+		function applyViewSwitch(viewName, options = {}) {
+			if (options.push !== false) viewNavigation.go(viewName, captureCurrentViewState());
+			else viewNavigation.restore(viewName);
+			const playerWasVisible = !document.getElementById('viewPlayer').classList.contains('hidden');
+            if (viewName !== 'player') {
+                if (!video.paused) video.pause();
+                savePlaybackProgress(true);
+                toggleEpisodeDrawer(false);
+				if (playerWasVisible) {
+					cancelActiveEpisodeSession('playback-cancelled');
+				}
+            }
+
+            const views = ['home', 'search', 'details', 'settings', 'player'];
+            views.forEach(v => {
+                const el = document.getElementById(`view${v.charAt(0).toUpperCase() + v.slice(1)}`);
+                if (el) el.classList.add('hidden');
+                
+                const navBtn = document.getElementById(`nav${v.charAt(0).toUpperCase() + v.slice(1)}`);
+                if (navBtn) {
+                    navBtn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs transition text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 hover:text-cyan-500 dark:hover:text-white border border-transparent";
+                }
+            });
+
+            // Activate Target View
+            const activeView = document.getElementById(`view${viewName.charAt(0).toUpperCase() + viewName.slice(1)}`);
+            if (activeView) activeView.classList.remove('hidden');
+
+            const activeBtn = document.getElementById(`nav${viewName.charAt(0).toUpperCase() + viewName.slice(1)}`);
+            if (activeBtn) {
+                activeBtn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs transition text-cyan-600 dark:text-cyan-300 bg-cyan-500/10 border border-cyan-500/30 font-semibold";
+            }
+
+            if (viewName === 'home') {
+                if (lastHomeLoadedAt) renderHomeView();
+                loadHomeFromApi();
+            }
+			if (viewName === 'search' && !options.restoreState) renderCatalog();
+			restoreViewState(viewName, options.restoreState);
+        }
+
+        function renderContinueWatching() {
+            const wrapper = document.getElementById('continueWatchingWrapper');
+            const container = document.getElementById('continueWatchingSection');
+            const items = deduplicateHistoryItems()
+                .filter(item => {
+                    if (!item || item.completed || item.position < 1 || item.duration <= 0) return false;
+                    if (item.position / item.duration >= COMPLETION_THRESHOLD) return false;
+					return Boolean(resolveHistoryAnime(item) || createHistoryAnimeSnapshot(item));
+                })
+                .sort((a, b) => b.lastPlayedAt - a.lastPlayedAt);
+
+            container.innerHTML = '';
+            wrapper.classList.toggle('hidden', items.length === 0);
+            if (items.length === 0) return;
+
+            items.forEach(item => {
+				const anime = resolveHistoryAnime(item) || createHistoryAnimeSnapshot(item);
+				const episode = resolveHistoryEpisode(anime, item);
+				const episodeNumber = episode?.number ?? item.episodeNumber ?? (Number(item.epIndex) + 1);
+                const progress = Math.min(100, Math.max(0, (item.position / item.duration) * 100));
+                const card = document.createElement('div');
+                card.className = 'group relative rounded-xl overflow-hidden bg-slate-200/50 dark:bg-deep-900 border border-slate-300 dark:border-white/10 hover:border-cyan-500/50 transition duration-300 cursor-pointer flex flex-col shadow-md hover:shadow-neon-cyan';
+                card.innerHTML = `
+                    <div class="continue-cover-frame relative aspect-[16/9] overflow-hidden bg-slate-950 bg-cover bg-center" style="background-image:url('${FALLBACK_COVER}')">
+                        <img src="${anime.banner || anime.poster}" data-fallback="${anime.poster}" alt="" onerror="applyImageFallback(this)" class="continue-cover-image absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-75 group-hover:opacity-55 transition"></div>
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
+                            <div class="w-10 h-10 rounded-full bg-cyan-500/90 text-slate-950 flex items-center justify-center shadow-neon-cyan">
+                                <i data-lucide="play" class="w-5 h-5 fill-slate-950 ml-0.5"></i>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 h-1.5 bg-black/60">
+                            <div class="h-full bg-gradient-to-r from-amber-500 to-cyan-400 rounded-r-full" style="width: ${progress}%;"></div>
+                        </div>
+                    </div>
+                    <div class="p-2.5 space-y-0.5">
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-cyan-500 transition">${anime.title}</h4>
+						<p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">Episódio ${episodeNumber}</p>
+                    </div>
+                `;
+				card.dataset.uiAction = 'continue-card';
+				card.onclick = () => resumeHistoryItem(item);
+                container.appendChild(card);
+
+                const coverImage = card.querySelector('.continue-cover-image');
+                if (coverImage) {
+                    coverImage.addEventListener('error', () => applyImageFallback(coverImage));
+                    requestAnimationFrame(() => {
+                        if (coverImage.complete && coverImage.naturalWidth === 0) applyImageFallback(coverImage);
+                    });
+                }
+            });
+
+            lucide.createIcons();
+        }
+
+        // Render Home View Cards
+        function renderHomeView() {
+            // Render Featured Hero
+            const hero = homeSections.featured[0];
+			const featuredHero = document.getElementById('featuredHero');
+			featuredHero.classList.toggle('hidden', !hero);
+			if (hero) {
+				document.getElementById('heroImage').src = hero.banner;
+				document.getElementById('heroTitle').textContent = hero.title;
+				document.getElementById('heroDesc').textContent = hero.description;
+				document.getElementById('heroRating').innerHTML = `<i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400 text-amber-400"></i> ${hero.rating}`;
+            
+            const heroPlayBtn = document.getElementById('heroPlayBtn');
+            const heroCanPlay = hero.playbackStatus === 'READY' && hero.availableEpisodeCount > 0;
+            heroPlayBtn.disabled = !heroCanPlay;
+            heroPlayBtn.classList.toggle('opacity-50', !heroCanPlay);
+            heroPlayBtn.classList.toggle('cursor-not-allowed', !heroCanPlay);
+            heroPlayBtn.title = heroCanPlay ? 'Ver detalhes e episódios' : 'Playback ainda indisponível';
+            heroPlayBtn.onclick = () => heroCanPlay ? openAnimeDetails(hero.id) : showToast('Este anime ainda não possui episódios disponíveis.');
+
+            const heroFavBtn = document.getElementById('heroFavBtn');
+            if (hero.isFavorite) {
+                heroFavBtn.innerHTML = `<i data-lucide="heart" class="w-4 h-4 fill-rose-500 text-rose-500"></i> Favoritado`;
+                heroFavBtn.className = "px-4 py-2.5 rounded-xl bg-rose-500/20 text-rose-300 font-medium text-xs flex items-center gap-2 border border-rose-500/30 transition shadow-lg shadow-rose-500/10";
+            } else {
+                heroFavBtn.innerHTML = `<i data-lucide="heart" class="w-4 h-4 text-rose-400"></i> Favoritar`;
+                heroFavBtn.className = "px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-medium text-xs flex items-center gap-2 border border-white/20 transition";
+            }
+				heroFavBtn.onclick = () => toggleFavorite(hero.id);
+			}
+
+            renderContinueWatching();
+
+            // Populate Favorites
+			const favorites = getFavoriteAnimes();
+            renderCardGrid(favorites, document.getElementById('favoritesSection'));
+
+            // Populate Popular
+            renderCardGrid(homeSections.popularSeason, document.getElementById('popularSection'));
+
+            // Populate Recent
+            renderCardGrid(homeSections.recentReleases, document.getElementById('recentSection'));
+
+            // Update Quick Favorites sidebar list
+            renderSidebarFavorites();
+            lucide.createIcons();
+        }
+
+        function renderCardGrid(animeList, containerEl) {
+            containerEl.innerHTML = '';
+            animeList.forEach(anime => {
+                const card = document.createElement('div');
+				card.dataset.uiAction = 'anime-card';
+                card.className = "group relative rounded-xl overflow-hidden bg-slate-200/50 dark:bg-deep-900 border border-slate-300 dark:border-white/10 hover:border-cyan-500/50 transition duration-300 cursor-pointer flex flex-col shadow-md hover:shadow-neon-cyan";
+                
+                card.innerHTML = `
+                    <div class="relative aspect-[3/4] overflow-hidden bg-slate-950">
+                        <img src="${anime.poster}" alt="${anime.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80 group-hover:opacity-60 transition"></div>
+                        
+                        ${anime.tag ? `<span class="absolute top-2 left-2 px-2 py-0.5 rounded text-[9px] font-bold ${anime.tag === 'DUBLADO' ? 'bg-emerald-500 text-slate-950' : 'bg-cyan-500 text-slate-950'}">${anime.tag}</span>` : ''}
+
+                        <button onclick="event.stopPropagation(); toggleFavorite('${anime.id}')" class="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 backdrop-blur-md text-white hover:text-rose-400 transition">
+                            <i data-lucide="heart" class="w-3.5 h-3.5 ${anime.isFavorite ? 'fill-rose-500 text-rose-500' : ''}"></i>
+                        </button>
+
+                        <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                            <span class="text-[10px] font-mono text-amber-400 bg-black/60 px-1.5 py-0.5 rounded backdrop-blur-md flex items-center gap-1">
+                                <i data-lucide="star" class="w-3 h-3 fill-amber-400"></i> ${anime.rating}
+                            </span>
+                            <span class="text-[10px] font-mono text-slate-300 bg-black/60 px-1.5 py-0.5 rounded backdrop-blur-md">
+								${getPublicEpisodeCount(anime)} EP${getPublicEpisodeCount(anime) !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-2.5 space-y-1">
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-cyan-500 transition">${anime.title}</h4>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">${(anime.genres ?? []).join(', ')}</p>
+                    </div>
+                `;
+
+                card.onclick = () => anime.apiManaged ? openAnimeDetails(anime.id) : openPlayer(anime.id, 0);
+                containerEl.appendChild(card);
+            });
+        }
+
+        function renderSidebarFavorites() {
+            const container = document.getElementById('quickFavoritesList');
+			const favorites = getFavoriteAnimes();
+            document.getElementById('favCountBadge').textContent = `${favorites.length} Salvo${favorites.length !== 1 ? 's' : ''}`;
+
+            container.innerHTML = '';
+            favorites.forEach(anime => {
+                const item = document.createElement('div');
+				item.dataset.uiAction = 'sidebar-anime-card';
+                item.className = "flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-white/5 cursor-pointer transition";
+                item.innerHTML = `
+                    <img src="${anime.poster}" class="w-8 h-8 rounded-md object-cover">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-medium text-slate-800 dark:text-slate-200 truncate">${anime.title}</p>
+						<p class="text-[9px] text-slate-400 truncate">${getPublicEpisodeCount(anime)} episódios</p>
+                    </div>
+                `;
+                item.onclick = () => anime.apiManaged ? openAnimeDetails(anime.id) : openPlayer(anime.id, 0);
+                container.appendChild(item);
+            });
+        }
+
+        // Pesquisa pública e pesquisa remota, ambas mediadas pelo HttpClient nativo.
+        let searchDebounceTimer = null;
+        let localSearchPage = 1;
+        let remoteSearchPage = 1;
+        let localSearchHasNext = false;
+        let remoteSearchHasNext = false;
+        let searchGeneration = 0;
+		let lastLocalSearchItems = [];
+		let lastRemoteSearchItems = [];
+        const SEARCH_PAGE_SIZE = 20;
+		const MIN_REMOTE_QUERY_LENGTH = 2;
+		const GENRE_ALIASES = Object.freeze({
+			'Ação': ['acao', 'action'],
+			'Fantasia': ['fantasia', 'fantasy'],
+			'Sci-Fi': ['sci fi', 'scifi', 'science fiction'],
+			'Aventura': ['aventura', 'adventure']
+		});
+
+		function normalizeGenre(value) {
+			return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]+/g, ' ').trim();
+		}
+
+		function applyGenreFilter(items) {
+			if (activeGenreFilter === 'Todos') return [...items];
+			const aliases = GENRE_ALIASES[activeGenreFilter] ?? [normalizeGenre(activeGenreFilter)];
+			return items.filter(anime => (anime.genres ?? []).some(genre => aliases.includes(normalizeGenre(genre))));
+		}
+
+		function refreshSearchIcons() {
+			lucide.createIcons({ attrs: { 'stroke-width': 2 } });
+		}
+
+		function renderSearchSnapshots() {
+			renderCardGrid(lastLocalSearchItems, document.getElementById('catalogGrid'));
+			renderRemoteGrid(lastRemoteSearchItems);
+			document.getElementById('remoteSearchWrapper').classList.toggle('hidden', lastRemoteSearchItems.length === 0);
+			refreshSearchIcons();
+		}
+
+        function renderRemoteGrid(items) {
+            const container = document.getElementById('remoteCatalogGrid');
+            container.innerHTML = '';
+            items.forEach(remote => {
+                const card = document.createElement('div');
+				card.dataset.uiAction = 'remote-anime-card';
+				card.className = 'group relative rounded-xl overflow-hidden bg-slate-200/50 dark:bg-deep-900 border border-emerald-500/20 hover:border-emerald-400/60 transition duration-300 cursor-pointer flex flex-col shadow-md';
+				card.title = 'Ver informações disponíveis';
+                const image = remote.coverUrl || FALLBACK_COVER;
+                card.innerHTML = `
+                    <div class="relative aspect-[3/4] overflow-hidden bg-slate-950">
+                        <img src="${image}" alt="" onerror="applyImageFallback(this)" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80"></div>
+                        <span class="absolute top-2 left-2 px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-500 text-slate-950">REMOTO</span>
+                    </div>
+                    <div class="p-2.5 space-y-1">
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">${remote.title || 'Título indisponível'}</h4>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">${[remote.format, remote.year].filter(Boolean).join(' • ')}</p>
+                    </div>`;
+				card.onclick = () => openRemoteDetails(remote);
+				container.appendChild(card);
+            });
+			refreshSearchIcons();
+        }
+
+        async function renderCatalog(options = {}) {
+            const queryInput = document.getElementById('catalogSearchInput');
+            const query = queryInput.value.trim();
+            const runLocal = options.local !== false;
+            const runRemote = options.remote !== false;
+            const generation = ++searchGeneration;
+
+			if (!query) {
+				lastLocalSearchItems = applyGenreFilter(ANIME_DATABASE);
+				lastRemoteSearchItems = [];
+				renderCardGrid(lastLocalSearchItems, document.getElementById('catalogGrid'));
+				const knownGenreCount = ANIME_DATABASE.filter(anime => (anime.genres ?? []).length > 0).length;
+				document.getElementById('searchResultsCount').textContent = activeGenreFilter === 'Todos'
+					? `Exibindo ${ANIME_DATABASE.length} animes disponíveis na Home`
+					: knownGenreCount === 0
+						? 'Os dados atuais da Home não informam gêneros para filtragem'
+						: `Encontrados ${lastLocalSearchItems.length} anime${lastLocalSearchItems.length !== 1 ? 's' : ''} com gênero ${activeGenreFilter}`;
+                document.getElementById('searchPagination').classList.add('hidden');
+                document.getElementById('remoteSearchWrapper').classList.add('hidden');
+				refreshSearchIcons();
+                return;
+            }
+
+            document.getElementById('searchResultsCount').textContent = 'Pesquisando...';
+            if (runLocal) {
+                try {
+                    const result = await requestAuraApi('search', { query, page: localSearchPage, limit: SEARCH_PAGE_SIZE }, 'catalog-search');
+                    if (generation !== searchGeneration) return;
+					const mapped = (result?.items ?? []).map(mapApiAnime);
+                    mapped.forEach(anime => {
+                        const existing = ANIME_DATABASE.find(item => item.id === anime.id);
+                        if (!existing) ANIME_DATABASE.push(anime);
+                    });
+					lastLocalSearchItems = applyGenreFilter(mapped);
+					renderCardGrid(lastLocalSearchItems, document.getElementById('catalogGrid'));
+                    localSearchHasNext = Boolean(result?.hasNextPage);
+					document.getElementById('searchResultsCount').textContent = activeGenreFilter === 'Todos'
+						? `Encontrados ${result?.count ?? mapped.length} anime${(result?.count ?? mapped.length) !== 1 ? 's' : ''}`
+						: `Encontrados ${lastLocalSearchItems.length} anime${lastLocalSearchItems.length !== 1 ? 's' : ''} com gênero ${activeGenreFilter} nesta página`;
+                    document.getElementById('searchPageLabel').textContent = `Página ${localSearchPage}`;
+                    document.getElementById('searchPrevBtn').disabled = localSearchPage <= 1;
+                    document.getElementById('searchNextBtn').disabled = !localSearchHasNext;
+                    document.getElementById('searchPagination').classList.remove('hidden');
+                    document.getElementById('searchPagination').classList.add('flex');
+					refreshSearchIcons();
+                } catch (error) {
+                    if (error.code !== 'cancelled' && generation === searchGeneration) {
+                        document.getElementById('searchResultsCount').textContent = error.message;
+						lastLocalSearchItems = [];
+						renderCardGrid([], document.getElementById('catalogGrid'));
+						refreshSearchIcons();
+                    }
+                }
+            }
+
+			if (runRemote && query.length >= MIN_REMOTE_QUERY_LENGTH) {
+                try {
+                    const result = await requestAuraApi('search-remote', { query, page: remoteSearchPage, limit: SEARCH_PAGE_SIZE }, 'remote-search');
+                    if (generation !== searchGeneration) return;
+					const items = result?.items ?? [];
+					lastRemoteSearchItems = items;
+					renderRemoteGrid(lastRemoteSearchItems);
+                    remoteSearchHasNext = Boolean(result?.hasNextPage);
+                    document.getElementById('remoteResultsCount').textContent = `${result?.count ?? items.length} resultado${(result?.count ?? items.length) !== 1 ? 's' : ''}`;
+                    document.getElementById('remoteSearchWrapper').classList.toggle('hidden', items.length === 0);
+                    document.getElementById('remotePageLabel').textContent = `Página ${remoteSearchPage}`;
+                    document.getElementById('remotePrevBtn').disabled = remoteSearchPage <= 1;
+                    document.getElementById('remoteNextBtn').disabled = !remoteSearchHasNext;
+                    document.getElementById('remoteSearchPagination').classList.toggle('hidden', items.length === 0);
+                    document.getElementById('remoteSearchPagination').classList.toggle('flex', items.length > 0);
+                } catch (error) {
+                    if (error.code !== 'cancelled' && generation === searchGeneration) {
+						lastRemoteSearchItems = [];
+                        document.getElementById('remoteSearchWrapper').classList.add('hidden');
+                    }
+                }
+			} else if (runRemote) {
+				lastRemoteSearchItems = [];
+				document.getElementById('remoteSearchWrapper').classList.add('hidden');
+            }
+        }
+
+        function filterGenre(genre) {
+            activeGenreFilter = genre;
+            const buttons = document.querySelectorAll('.genre-pill');
+            buttons.forEach(btn => {
+                if (btn.textContent === genre) {
+                    btn.className = "genre-pill active px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-semibold shadow-sm transition";
+                } else {
+                    btn.className = "genre-pill px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-white/10 transition";
+                }
+            });
+            localSearchPage = 1;
+            remoteSearchPage = 1;
+			renderCatalog({ remote: document.getElementById('catalogSearchInput').value.trim().length >= MIN_REMOTE_QUERY_LENGTH });
+        }
+
+        // Toggle Favorite State
+        function toggleFavorite(animeId) {
+			const anime = ANIME_DATABASE.find(a => String(a.id) === String(animeId))
+				?? getFavoriteAnimes().find(a => String(a.id) === String(animeId));
+            if (anime) {
+                anime.isFavorite = !anime.isFavorite;
+				if (anime.isFavorite) {
+					favoriteAnimeIds.add(String(anime.id));
+					favoriteRecords.set(String(anime.id), favoriteRecordFromAnime(anime, favoriteRecords.get(String(anime.id))));
+				} else {
+					favoriteAnimeIds.delete(String(anime.id));
+					favoriteRecords.delete(String(anime.id));
+				}
+				persistFavorites();
+                showToast(anime.isFavorite ? `Adicionado aos favoritos: ${anime.title}` : `Removido dos favoritos`);
+                renderHomeView();
+                if (!document.getElementById('viewSearch').classList.contains('hidden')) {
+					renderSearchSnapshots();
+                }
+            }
+        }
+
+        const video = document.getElementById('mainVideo');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const centerPlayBtn = document.getElementById('centerPlayBtn');
+        const seekBar = document.getElementById('seekBar');
+        const seekProgress = document.getElementById('seekProgress');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationTimeEl = document.getElementById('durationTime');
+        const volumeBar = document.getElementById('volumeBar');
+        const volumeProgress = document.getElementById('volumeProgress');
+        const volumeIcon = document.getElementById('volumeIcon');
+        const muteBtn = document.getElementById('muteBtn');
+        const toast = document.getElementById('toast');
+        const toastText = document.getElementById('toastText');
+        const subtitleSelect = document.getElementById('subtitleSelect');
+        const customPipPlayBtn = document.getElementById('customPipPlayBtn');
+        const customPipMuteBtn = document.getElementById('customPipMuteBtn');
+        const customPipNextBtn = document.getElementById('customPipNextBtn');
+        const customPipSettingsBtn = document.getElementById('customPipSettingsBtn');
+        const customPipSettingsMenu = document.getElementById('customPipSettingsMenu');
+        const customPipSpeedButton = document.getElementById('customPipSpeedButton');
+        const customPipSpeedValue = document.getElementById('customPipSpeedValue');
+        const customPipSpeedOptions = document.getElementById('customPipSpeedOptions');
+        const customPipSpeedOptionButtons = [...document.querySelectorAll('.custom-pip-speed-option')];
+        function syncCustomPipSpeed(value) {
+            const normalized = String(Number(value));
+            customPipSpeedValue.textContent = `${Number(normalized).toFixed(normalized === '1' ? 1 : (normalized.includes('.') ? normalized.split('.')[1].length : 1))}x`;
+            customPipSpeedOptionButtons.forEach(button => button.classList.toggle('active', button.dataset.speed === normalized));
+        }
+        let centerFeedbackTimer = null;
+
+        const SUPPORTED_SUBTITLE_LANGUAGES = {
+            pt: 'Legenda: PT-BR',
+            en: 'Subtitle: English',
+            es: 'Subtítulo: Español',
+            jp: '字幕: 日本語'
+        };
+
+        function configureSubtitleTracks(sourceTracks = []) {
+            video.querySelectorAll('track[data-auraplay-subtitle]').forEach(track => track.remove());
+            subtitleSelect.innerHTML = '<option value="off">Legendas: Off</option>';
+
+            const seenLanguages = new Set();
+            const normalizeSubtitleLanguage = language => {
+                const value = String(language || '').toLowerCase();
+                if (value === 'pt' || value.startsWith('pt-') || value.includes('portugu')) return 'pt';
+                if (value === 'en' || value.startsWith('en-') || value.includes('english')) return 'en';
+                if (value === 'es' || value.startsWith('es-') || value.includes('spanish') || value.includes('españ')) return 'es';
+                if (value === 'jp' || value === 'ja' || value.startsWith('ja-') || value.includes('japan')) return 'jp';
+                return null;
+            };
+            const usableTracks = sourceTracks
+                .map(track => ({ ...track, src: track?.src || track?.url, language: normalizeSubtitleLanguage(track?.language) }))
+                .filter(track => track.src && track.language && SUPPORTED_SUBTITLE_LANGUAGES[track.language])
+                .filter(track => {
+                    if (seenLanguages.has(track.language)) return false;
+                    seenLanguages.add(track.language);
+                    return true;
+                })
+                .sort((a, b) =>
+                    ['pt', 'en', 'es', 'jp'].indexOf(a.language) -
+                    ['pt', 'en', 'es', 'jp'].indexOf(b.language));
+
+            usableTracks.forEach(trackInfo => {
+                const track = document.createElement('track');
+                track.dataset.auraplaySubtitle = 'true';
+                track.kind = 'subtitles';
+                track.srclang = trackInfo.language === 'jp' ? 'ja' : trackInfo.language;
+                track.label = SUPPORTED_SUBTITLE_LANGUAGES[trackInfo.language];
+                track.src = trackInfo.src;
+                video.appendChild(track);
+
+                const option = document.createElement('option');
+                option.value = trackInfo.language;
+                option.textContent = SUPPORTED_SUBTITLE_LANGUAGES[trackInfo.language];
+                subtitleSelect.appendChild(option);
+            });
+
+            subtitleSelect.value = 'off';
+            subtitleSelect.disabled = usableTracks.length === 0;
+        }
+
+        function applySubtitleSelection() {
+            const selectedLanguage = subtitleSelect.value;
+            Array.from(video.textTracks).forEach(track => {
+                const normalizedLanguage = track.language === 'ja' ? 'jp' : track.language;
+                track.mode = selectedLanguage !== 'off' && normalizedLanguage === selectedLanguage
+                    ? 'showing'
+                    : 'disabled';
+            });
+        }
+
+        subtitleSelect.addEventListener('change', () => {
+            applySubtitleSelection();
+            const selectedText = subtitleSelect.options[subtitleSelect.selectedIndex].text;
+            showToast(`Idioma alterado: ${selectedText}`);
+        });
+
+        function openPlayer(animeId, epIndex = 0) {
+            const anime = ANIME_DATABASE.find(a => a.id === animeId);
+            if (!anime) return;
+
+            savePlaybackProgress(true);
+            currentAnime = anime;
+            switchNav('player');
+            loadEpisode(epIndex, null, true);
+        }
+
+        let detailsAnimeId = null;
+		let detailsMode = 'local';
+		let selectedRemoteAnime = null;
+        let selectedAnimeDetails = null;
+        let selectedAnimeEpisodes = null;
+
+        function stripApiHtml(value) {
+            const element = document.createElement('div');
+            element.innerHTML = value || '';
+            return element.textContent || '';
+        }
+
+        async function openAnimeDetails(animeId) {
+            if (!animeId) return;
+			detailsMode = 'local';
+			selectedRemoteAnime = null;
+            detailsAnimeId = animeId;
+			switchNav('details');
+            document.getElementById('detailsLoading').classList.remove('hidden');
+            document.getElementById('detailsContent').classList.add('hidden');
+            document.getElementById('detailsError').classList.add('hidden');
+
+            try {
+                const [details, episodes] = await Promise.all([
+                    requestAuraApi('anime', { animeId }, 'anime-details'),
+                    requestAuraApi('episodes', { animeId }, 'anime-episodes')
+                ]);
+                if (detailsAnimeId !== animeId) return;
+                selectedAnimeDetails = details;
+                selectedAnimeEpisodes = episodes;
+
+                const mappedAnime = mapApiAnime(details);
+                mappedAnime.description = details.description || '';
+                mappedAnime.genres = details.genres ?? [];
+                mappedAnime.seasons = episodes.seasons ?? [];
+                mappedAnime.episodes = mappedAnime.seasons.flatMap(season =>
+                    (season.episodes ?? []).map(episode => ({ ...episode, seasonId: season.id, seasonNumber: season.number, apiManaged: true }))
+                );
+				mappedAnime.publicEpisodeCount = mappedAnime.episodes.length;
+                const existingIndex = ANIME_DATABASE.findIndex(anime => anime.id === animeId);
+                if (existingIndex >= 0) ANIME_DATABASE[existingIndex] = { ...ANIME_DATABASE[existingIndex], ...mappedAnime };
+                else ANIME_DATABASE.push(mappedAnime);
+				propagatePublicEpisodeCount(animeId, mappedAnime.publicEpisodeCount);
+
+                renderAnimeDetails(details, episodes);
+                document.getElementById('detailsLoading').classList.add('hidden');
+                document.getElementById('detailsContent').classList.remove('hidden');
+            } catch (error) {
+                if (error.code === 'cancelled') return;
+                document.getElementById('detailsLoading').classList.add('hidden');
+                document.getElementById('detailsError').classList.remove('hidden');
+                document.getElementById('detailsErrorText').textContent = error.message;
+            }
+        }
+
+		function openRemoteDetails(remote) {
+			detailsMode = 'remote';
+			selectedRemoteAnime = remote;
+			detailsAnimeId = null;
+			selectedDetailsSeasonId = null;
+			switchNav('details');
+			document.getElementById('detailsLoading').classList.add('hidden');
+			document.getElementById('detailsError').classList.add('hidden');
+			document.getElementById('detailsContent').classList.remove('hidden');
+
+			const banner = document.getElementById('detailsBanner');
+			banner.dataset.fallback = FALLBACK_COVER;
+			banner.src = remote.coverUrl || FALLBACK_COVER;
+			document.getElementById('detailsTitle').textContent = remote.title || 'Título indisponível';
+			const alternativeTitles = (remote.alternativeTitles ?? []).filter(Boolean);
+			document.getElementById('detailsDescription').textContent = [
+				'Este anime ainda não está disponível no catálogo do AuraPlay.',
+				alternativeTitles.length ? `Títulos alternativos: ${alternativeTitles.join(' • ')}` : null
+			].filter(Boolean).join(' ');
+			const playbackBadge = document.getElementById('detailsPlaybackBadge');
+			playbackBadge.textContent = 'Somente informações';
+			playbackBadge.className = 'px-2 py-1 rounded bg-slate-700 text-slate-200 font-bold';
+			document.getElementById('detailsScore').textContent = 'Sem nota local';
+			document.getElementById('detailsMetadata').textContent = [remote.format, remote.year, remote.status].filter(Boolean).join(' • ');
+			document.getElementById('detailsEpisodeCount').textContent = remote.expectedEpisodeCount
+				? `${remote.expectedEpisodeCount} episódio${remote.expectedEpisodeCount === 1 ? '' : 's'} esperado${remote.expectedEpisodeCount === 1 ? '' : 's'}`
+				: 'Nenhum episódio disponível';
+			document.getElementById('detailsSeasonTabs').innerHTML = '';
+			document.getElementById('detailsEpisodesList').innerHTML = '<p class="text-sm text-slate-400">Temporadas e episódios não estão disponíveis para resultados remotos.</p>';
+			lucide.createIcons();
+		}
+
+        function renderAnimeDetails(details, episodesResponse) {
+            const fallbackImage = details.coverUrl || FALLBACK_COVER;
+            const banner = document.getElementById('detailsBanner');
+            banner.dataset.fallback = fallbackImage;
+            banner.src = details.bannerUrl || fallbackImage;
+            document.getElementById('detailsTitle').textContent = details.title || 'Título indisponível';
+            document.getElementById('detailsDescription').textContent = stripApiHtml(details.description) || 'Descrição não fornecida pela API.';
+			const seasons = episodesResponse?.seasons ?? [];
+			const publicEpisodeCount = seasons.reduce((total, season) => total + (season.episodes?.length ?? 0), 0);
+			const playbackBadge = document.getElementById('detailsPlaybackBadge');
+			playbackBadge.textContent = publicEpisodeCount > 0 ? 'Episódios disponíveis' : 'Episódios ainda não disponíveis';
+			playbackBadge.className = publicEpisodeCount > 0
+				? 'px-2 py-1 rounded bg-cyan-500 text-slate-950 font-bold'
+				: 'px-2 py-1 rounded bg-slate-700 text-slate-200 font-bold';
+            document.getElementById('detailsScore').textContent = Number.isFinite(Number(details.averageScore)) ? `★ ${(Number(details.averageScore) / 10).toFixed(1)}` : 'Sem nota';
+            document.getElementById('detailsMetadata').textContent = [details.format, details.year, ...(details.genres ?? [])].filter(Boolean).join(' • ');
+			document.getElementById('detailsEpisodeCount').textContent = `${publicEpisodeCount} disponível${publicEpisodeCount === 1 ? '' : 'is'}`;
+
+            const tabs = document.getElementById('detailsSeasonTabs');
+            tabs.innerHTML = '';
+			selectedDetailsSeasonId = seasons[0]?.id ?? null;
+            seasons.forEach((season, index) => {
+                const button = document.createElement('button');
+				button.dataset.uiAction = 'season-filter';
+                button.textContent = season.title;
+                button.className = `details-season-tab px-3 py-2 rounded-xl text-xs font-semibold border transition ${index === 0 ? 'bg-cyan-500 text-slate-950 border-cyan-400' : 'bg-white/5 text-slate-300 border-white/10 hover:border-cyan-500/40'}`;
+                button.onclick = () => {
+					selectedDetailsSeasonId = season.id;
+                    document.querySelectorAll('.details-season-tab').forEach(tab => tab.className = 'details-season-tab px-3 py-2 rounded-xl text-xs font-semibold border transition bg-white/5 text-slate-300 border-white/10 hover:border-cyan-500/40');
+                    button.className = 'details-season-tab px-3 py-2 rounded-xl text-xs font-semibold border transition bg-cyan-500 text-slate-950 border-cyan-400';
+                    renderDetailsEpisodes(season);
+                };
+                tabs.appendChild(button);
+            });
+
+            if (seasons.length > 0) renderDetailsEpisodes(seasons[0]);
+            else {
+                const list = document.getElementById('detailsEpisodesList');
+                list.innerHTML = '<p class="text-sm text-slate-400">Nenhum episódio disponível.</p>';
+            }
+            lucide.createIcons();
+        }
+
+        function renderDetailsEpisodes(season) {
+            const list = document.getElementById('detailsEpisodesList');
+            list.innerHTML = '';
+            (season.episodes ?? []).forEach(episode => {
+                const button = document.createElement('button');
+				button.dataset.uiAction = 'episode-card';
+                button.disabled = !episode.available;
+                button.className = 'flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-500/40 disabled:opacity-45 disabled:cursor-not-allowed text-left transition';
+                const icon = document.createElement('i');
+                icon.setAttribute('data-lucide', episode.available ? 'play-circle' : 'film');
+                icon.className = 'w-4 h-4 text-cyan-400 shrink-0';
+                const text = document.createElement('div');
+                text.className = 'flex-1 min-w-0';
+                const title = document.createElement('p');
+                title.className = 'text-xs font-semibold text-slate-200 truncate';
+                title.textContent = `Episódio ${episode.number} • ${episode.title}`;
+                const metadata = document.createElement('p');
+                metadata.className = 'text-[10px] text-slate-500';
+                metadata.textContent = [episode.audioType, episode.durationSeconds ? formatTime(episode.durationSeconds) : null].filter(Boolean).join(' • ');
+                text.append(title, metadata);
+                button.append(icon, text);
+                button.onclick = () => openApiEpisode(episode.id);
+                list.appendChild(button);
+            });
+            lucide.createIcons();
+        }
+
+        async function openApiEpisode(episodeId, resumeTime = null) {
+            const anime = ANIME_DATABASE.find(item => item.id === detailsAnimeId) || currentAnime;
+			const canonicalEpisodes = Array.isArray(anime?.episodes) ? anime.episodes.map(episode => ({ ...episode })) : [];
+			const episodeIndex = canonicalEpisodes.findIndex(episode => String(episode.id) === String(episodeId));
+            if (!anime || episodeIndex < 0) {
+				reportPlaybackDiagnostic('episode-not-found');
+				showToast('Não foi possível preparar este episódio.');
+                return;
+            }
+
+            savePlaybackProgress(true);
+			cancelActiveEpisodeSession('playback-cancelled');
+			const requestedEpisode = canonicalEpisodes[episodeIndex];
+			const session = {
+				id: ++episodeSessionSequence,
+				animeId: String(anime.id),
+				episodeId: String(requestedEpisode.id),
+				episodeIndex,
+				episode: requestedEpisode,
+				episodes: canonicalEpisodes,
+				originView: viewNavigation.currentView,
+				cancelled: false
+			};
+			activeEpisodeSession = session;
+			playerEpisodes = session.episodes;
+            currentAnime = anime;
+            currentEpIndex = episodeIndex;
+            pendingResumeTime = Number.isFinite(Number(resumeTime)) ? Number(resumeTime) : null;
+            isChangingEpisode = true;
+            switchNav('player');
+			updatePlayerEpisodeSnapshot(session.episodes, session.episodeId);
+            showToast('Preparando playback pela API...');
+
+            try {
+				cleanupPlaybackEngine(true);
+				clearNativePlaybackHeaders();
+				const playback = await requestAuraApi('playback', { episodeId: session.episodeId }, 'playback');
+				if (!isCurrentEpisodeSession(session) || !session.episodes.includes(session.episode)) {
+					reportPlaybackDiagnostic('stale-session');
+					return;
+				}
+				const episode = session.episode;
+                episode.src = playback.url;
+                episode.subtitles = playback.subtitleTracks ?? [];
+                episode.playback = playback;
+				video.poster = playback.posterUrl || anime.banner || anime.poster || '';
+                configureSubtitleTracks(playback.subtitleTracks ?? []);
+				updatePlayerEpisodeSnapshot(session.episodes, session.episodeId);
+
+                const sidebarWidget = document.getElementById('sidebarNowPlaying');
+                sidebarWidget.classList.remove('hidden');
+				document.getElementById('sidebarPlayerThumb').src = anime.poster;
+				document.getElementById('sidebarPlayerTitle').textContent = anime.title;
+                document.getElementById('sidebarPlayerSub').textContent = `Episódio ${episode.number} • ${episode.title}`;
+
+				await startPlaybackEngine(playback);
+				if (!isCurrentEpisodeSession(session)) return;
+                updatePlayState(true);
+            } catch (error) {
+				if (activeEpisodeSession !== session || session.cancelled || error?.code === 'cancelled') return;
+				reportPlaybackDiagnostic('playback-prepare-failed');
+                updatePlayState(false);
+				showToast('Não foi possível preparar este episódio.');
+			} finally {
+				if (activeEpisodeSession === session) isChangingEpisode = false;
+			}
+        }
+
+		document.getElementById('detailsBackBtn').addEventListener('click', navigateBack);
+		document.getElementById('detailsRetryBtn').addEventListener('click', () => {
+			if (detailsMode === 'local' && detailsAnimeId) openAnimeDetails(detailsAnimeId);
+		});
+
+		async function hydrateHistoryAnime(item) {
+			let anime = resolveHistoryAnime(item);
+			let catalogId = anime?.apiManaged && isApiUuid(anime.id)
+				? anime.id
+				: historyIdentityValues(item).find(isApiUuid);
+
+			if (!catalogId) {
+				const legacyTitle = getHistoryTitle(item);
+				if (!legacyTitle) throw new Error('Este registro antigo não possui identidade suficiente para retomada.');
+				const result = await requestAuraApi('search', { query: legacyTitle, page: 1, limit: SEARCH_PAGE_SIZE }, 'history-search');
+				const normalizedTitle = normalizeHistoryIdentity(legacyTitle);
+				const exactMatch = (result?.items ?? []).find(candidate =>
+					[candidate.title, ...(candidate.alternativeTitles ?? [])]
+						.some(title => normalizeHistoryIdentity(title) === normalizedTitle));
+				if (!exactMatch?.id) throw new Error('O anime deste registro antigo não foi localizado no catálogo atual.');
+				anime = mapApiAnime(exactMatch);
+				catalogId = anime.id;
+			}
+
+			if (anime?.episodes?.length) return anime;
+
+			const [details, episodesResponse] = await Promise.all([
+				requestAuraApi('anime', { animeId: catalogId }, 'history-anime'),
+				requestAuraApi('episodes', { animeId: catalogId }, 'history-episodes')
+			]);
+			const hydrated = mapApiAnime(details);
+			hydrated.description = details.description || '';
+			hydrated.genres = details.genres ?? [];
+			hydrated.seasons = episodesResponse.seasons ?? [];
+			hydrated.episodes = hydrated.seasons.flatMap(season =>
+				(season.episodes ?? []).map(episode => ({
+					...episode,
+					seasonId: season.id,
+					seasonNumber: season.number,
+					apiManaged: true
+				}))
+			);
+			hydrated.publicEpisodeCount = hydrated.episodes.length;
+
+			const existingIndex = ANIME_DATABASE.findIndex(candidate => candidate.id === hydrated.id);
+			if (existingIndex >= 0) ANIME_DATABASE[existingIndex] = { ...ANIME_DATABASE[existingIndex], ...hydrated };
+			else ANIME_DATABASE.push(hydrated);
+			propagatePublicEpisodeCount(hydrated.id, hydrated.publicEpisodeCount);
+			return ANIME_DATABASE.find(candidate => candidate.id === hydrated.id);
+		}
+
+		async function resumeHistoryItem(item) {
+			try {
+				const anime = await hydrateHistoryAnime(item);
+				const episode = resolveHistoryEpisode(anime, item);
+				if (!episode?.id || !episode.available) throw new Error('O episódio salvo não está disponível no catálogo atual.');
+
+				detailsAnimeId = anime.id;
+				currentAnime = anime;
+				currentEpIndex = anime.episodes.indexOf(episode);
+				await openApiEpisode(episode.id, Number(item.position));
+			} catch (error) {
+				if (error.code !== 'cancelled') showToast(error.message || 'Não foi possível retomar este episódio.');
+			}
+		}
+
+        function resumePlayer(animeId, epIndex, targetTime) {
+            const anime = ANIME_DATABASE.find(candidate => candidate.id === animeId);
+            if (!anime?.episodes[epIndex]) return;
+
+            savePlaybackProgress(true);
+            currentAnime = anime;
+            switchNav('player');
+            loadEpisode(epIndex, targetTime, true);
+        }
+
+        function loadEpisode(index, resumeTime = null, skipCurrentSave = false) {
+			const episodes = playerEpisodes.length ? playerEpisodes : (currentAnime?.episodes ?? []);
+			const ep = episodes[index];
+            if (!ep) return;
+
+            if (ep.apiManaged && ep.id) {
+                openApiEpisode(ep.id, resumeTime);
+                return;
+            }
+
+            if (!skipCurrentSave) savePlaybackProgress(true);
+            isChangingEpisode = true;
+            currentEpIndex = index;
+            pendingResumeTime = Number.isFinite(Number(resumeTime)) ? Number(resumeTime) : null;
+
+			cleanupPlaybackEngine(true);
+			activePlaybackEngine = 'native';
+			reportHlsDiagnostic('playback-engine-selected', { phase: 'native' });
+            video.src = ep.src;
+            configureSubtitleTracks(ep.subtitles ?? []);
+			updatePlayerEpisodeSnapshot(episodes, ep.id);
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => updatePlayState(true)).catch(error => {
+                    console.warn('Autoplay não iniciado:', error);
+                    updatePlayState(false);
+                });
+            }
+
+            const sidebarWidget = document.getElementById('sidebarNowPlaying');
+            sidebarWidget.classList.remove('hidden');
+            document.getElementById('sidebarPlayerThumb').src = currentAnime.poster;
+            document.getElementById('sidebarPlayerTitle').textContent = currentAnime.title;
+            document.getElementById('sidebarPlayerSub').textContent = ep.title;
+            showToast(`Reproduzindo: ${currentAnime.title} - ${ep.title}`);
+        }
+
+        function updatePlayerEpisodeSnapshot(episodes, activeEpisodeId) {
+			playerEpisodes = Array.isArray(episodes) ? episodes : [];
+			currentEpIndex = playerEpisodes.findIndex(episode => String(episode?.id) === String(activeEpisodeId));
+			if (currentEpIndex < 0) currentEpIndex = 0;
+			const count = playerEpisodes.length;
+			document.getElementById('playerEpCount').textContent = `${count} Ep${count !== 1 ? 's' : ''}`;
+			renderEpisodesList(playerEpisodes, activeEpisodeId);
+		}
+
+        function renderEpisodesList(episodes = playerEpisodes, activeEpisodeId = playerEpisodes[currentEpIndex]?.id) {
+            const container = document.getElementById('episodesListContainer');
+			if (!container) return;
+            container.innerHTML = '';
+
+			const snapshot = Array.isArray(episodes) ? episodes : [];
+			snapshot.forEach((ep, i) => {
+				if (!ep) return;
+                const isActive = String(ep.id) === String(activeEpisodeId);
+                const card = document.createElement('div');
+                card.className = `p-2.5 rounded-xl cursor-pointer transition flex items-center justify-between border ${
+                    isActive ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300' : 'bg-white/5 border-white/5 hover:bg-white/10 text-slate-300'
+                }`;
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <i data-lucide="${isActive ? 'play-circle' : 'film'}" class="w-4 h-4 ${isActive ? 'text-cyan-400' : 'text-slate-400'}"></i>
+                        <span class="text-xs font-medium truncate">${ep.title}</span>
+                    </div>
+                    <span class="text-[10px] font-mono text-slate-400 ml-2">${ep.duration || (ep.durationSeconds ? formatTime(ep.durationSeconds) : '—')}</span>
+                `;
+
+                card.onclick = () => ep.apiManaged && ep.id ? openApiEpisode(ep.id) : loadEpisode(i);
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function togglePlay() {
+            if (video.paused) {
+				reportPlaybackDiagnostic('play-requested');
+                const playPromise = video.play();
+                if (playPromise !== undefined) {
+                    playPromise
+                        .then(() => showCenterPlayFeedback())
+                        .catch(() => updatePlayState(false));
+                }
+            } else {
+                video.pause();
+            }
+        }
+
+        function showCenterPlayFeedback() {
+            clearTimeout(centerFeedbackTimer);
+            centerPlayBtn.innerHTML = '<i data-lucide="play" class="w-8 h-8 fill-white ml-1 text-cyan-100"></i>';
+            centerPlayBtn.classList.remove('opacity-0');
+            centerPlayBtn.classList.add('pointer-events-none', 'scale-100');
+            lucide.createIcons();
+            centerFeedbackTimer = setTimeout(() => {
+                centerPlayBtn.classList.add('opacity-0', 'pointer-events-none');
+                centerPlayBtn.classList.remove('scale-100');
+            }, 520);
+        }
+
+        function updatePlayState(isPlaying) {
+            if (isPlaying) {
+                playPauseBtn.innerHTML = '<i data-lucide="pause" class="w-5 h-5 fill-slate-950"></i>';
+                customPipPlayBtn.innerHTML = '<i data-lucide="pause" class="w-5 h-5 fill-current"></i>';
+                centerPlayBtn.classList.add('opacity-0', 'pointer-events-none');
+            } else {
+                playPauseBtn.innerHTML = '<i data-lucide="play" class="w-5 h-5 fill-slate-950 ml-0.5"></i>';
+                customPipPlayBtn.innerHTML = '<i data-lucide="play" class="w-5 h-5 fill-current ml-0.5"></i>';
+                centerPlayBtn.innerHTML = '<i data-lucide="pause" class="w-8 h-8 fill-white text-cyan-100"></i>';
+                centerPlayBtn.classList.remove('opacity-0', 'pointer-events-none');
+            }
+            lucide.createIcons();
+        }
+
+        video.addEventListener('play', () => updatePlayState(true));
+        video.addEventListener('pause', () => updatePlayState(false));
+
+        function formatTime(seconds) {
+            if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        function savePlaybackProgress(force = false, completedOverride = false) {
+            if (isChangingEpisode || !currentAnime || !video.currentSrc) return;
+
+            const duration = Number(video.duration);
+            const position = Number(video.currentTime);
+            if (!Number.isFinite(duration) || duration <= 0 || !Number.isFinite(position)) return;
+
+            const now = Date.now();
+            if (!force && now - lastHistorySaveAt < HISTORY_SAVE_INTERVAL_MS) return;
+
+			const episode = (playerEpisodes.length ? playerEpisodes : currentAnime.episodes)[currentEpIndex];
+            if (!episode) return;
+
+            const completed = completedOverride || position / duration >= COMPLETION_THRESHOLD;
+            if (position < 1 && !completed) return;
+
+            continueWatching[currentAnime.id] = {
+				...(continueWatching[currentAnime.id] ?? {}),
+                catalogId: currentAnime.id,
+                sourceAnimeId: currentAnime.id,
+				seasonId: episode.seasonId || `${currentAnime.id}:default`,
+				seasonNumber: episode.seasonNumber ?? 1,
+                animeId: currentAnime.id,
+				episodeId: episode.id || `${currentAnime.id}:${episode.number}`,
+                episodeNumber: episode.number,
+				animeTitle: currentAnime.title,
+				animePoster: currentAnime.poster || null,
+				animeBanner: currentAnime.banner || currentAnime.poster || null,
+				episodeTitle: episode.title || null,
+                epIndex: currentEpIndex,
+                position,
+                duration,
+                lastPlayedAt: now,
+                completed
+            };
+
+            lastHistorySaveAt = now;
+            persistContinueWatching();
+
+            if (!document.getElementById('viewHome').classList.contains('hidden')) {
+                renderContinueWatching();
+            }
+        }
+
+        video.addEventListener('loadedmetadata', () => {
+			reportPlaybackDiagnostic('loadedmetadata');
+            durationTimeEl.textContent = formatTime(video.duration);
+
+            if (pendingResumeTime !== null) {
+                const resumeLimit = video.duration * COMPLETION_THRESHOLD;
+                if (pendingResumeTime > 0 && pendingResumeTime < resumeLimit) {
+                    video.currentTime = Math.min(pendingResumeTime, Math.max(0, video.duration - 1));
+                    video.play().catch(() => updatePlayState(false));
+                    showToast(`Continuando em ${formatTime(pendingResumeTime)}`);
+                }
+                pendingResumeTime = null;
+            }
+
+            isChangingEpisode = false;
+        });
+
+        video.addEventListener('error', () => {
+			reportPlaybackDiagnostic('error', video.error?.code ?? 0);
+            isChangingEpisode = false;
+            pendingResumeTime = null;
+        });
+
+		video.addEventListener('canplay', () => reportPlaybackDiagnostic('canplay'));
+		video.addEventListener('playing', () => reportPlaybackDiagnostic('playing'));
+
+        video.addEventListener('timeupdate', () => {
+            if (Number.isFinite(video.duration) && video.duration > 0) {
+                const percentage = (video.currentTime / video.duration) * 100;
+                seekBar.value = percentage;
+                seekProgress.style.width = `${percentage}%`;
+                currentTimeEl.textContent = formatTime(video.currentTime);
+                durationTimeEl.textContent = formatTime(video.duration);
+                savePlaybackProgress();
+            }
+        });
+
+        seekBar.addEventListener('input', () => {
+            const time = (seekBar.value / 100) * video.duration;
+            video.currentTime = time;
+            seekProgress.style.width = `${seekBar.value}%`;
+        });
+
+        video.addEventListener('seeked', () => savePlaybackProgress(true));
+        video.addEventListener('pause', () => savePlaybackProgress(true));
+        video.addEventListener('ended', () => {
+            updatePlayState(false);
+            savePlaybackProgress(true, true);
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') savePlaybackProgress(true);
+        });
+        window.addEventListener('pagehide', () => {
+			reportPlayerLifecycle('document-pagehide', { nativeCommand: closeRequested ? 'close' : 'document-unload' });
+			performCloseCleanup();
+		});
+        window.addEventListener('beforeunload', () => {
+			reportPlayerLifecycle('document-beforeunload', { nativeCommand: closeRequested ? 'close' : 'document-unload' });
+			performCloseCleanup();
+		});
+		window.addEventListener('unload', () => {
+			reportPlayerLifecycle('document-unload', { nativeCommand: closeRequested ? 'close' : 'document-unload' });
+		});
+
+        // Layer-fixed Volume Slider
+        function updateVolumeUI() {
+            const val = video.muted ? 0 : video.volume;
+            volumeBar.value = val;
+            volumeProgress.style.width = `${val * 100}%`;
+            customPipMuteBtn.innerHTML = `<i data-lucide="${video.muted || val === 0 ? 'volume-x' : 'headphones'}" class="w-5 h-5"></i>`;
+
+            if (video.muted || val === 0) {
+                volumeIcon.setAttribute('data-lucide', 'volume-x');
+            } else if (val < 0.5) {
+                volumeIcon.setAttribute('data-lucide', 'volume-1');
+            } else {
+                volumeIcon.setAttribute('data-lucide', 'volume-2');
+            }
+            lucide.createIcons();
+        }
+
+        volumeBar.addEventListener('input', () => {
+            video.volume = volumeBar.value;
+            video.muted = (volumeBar.value == 0);
+            updateVolumeUI();
+        });
+
+        muteBtn.addEventListener('click', () => {
+            video.muted = !video.muted;
+            updateVolumeUI();
+        });
+
+        // Theme Switcher (Dark / Light White)
+        function setTheme(mode) {
+            const html = document.documentElement;
+            const checkDark = document.getElementById('checkDark');
+            const checkLight = document.getElementById('checkLight');
+            const optDark = document.getElementById('themeOptDark');
+            const optLight = document.getElementById('themeOptLight');
+
+            if (mode === 'dark') {
+                html.classList.add('dark');
+                checkDark.classList.remove('hidden');
+                checkLight.classList.add('hidden');
+                optDark.className = "p-4 rounded-xl border-2 border-cyan-500 bg-deep-950 text-white cursor-pointer flex flex-col items-center gap-3 shadow-lg transition";
+                optLight.className = "p-4 rounded-xl border-2 border-transparent bg-slate-200 hover:bg-slate-300 text-slate-900 cursor-pointer flex flex-col items-center gap-3 transition";
+                showToast("Tema alterado para Escuro (Dark OLED)");
+            } else {
+                html.classList.remove('dark');
+                checkDark.classList.add('hidden');
+                checkLight.classList.remove('hidden');
+                optLight.className = "p-4 rounded-xl border-2 border-cyan-500 bg-white text-slate-900 cursor-pointer flex flex-col items-center gap-3 shadow-lg transition";
+                optDark.className = "p-4 rounded-xl border-2 border-transparent bg-slate-800 hover:bg-slate-700 text-white cursor-pointer flex flex-col items-center gap-3 transition";
+                showToast("Tema alterado para Claro (White)");
+            }
+        }
+
+        // Video FX Drawer
+        const toggleFxBtn = document.getElementById('toggleFxBtn');
+        const fxDrawer = document.getElementById('fxDrawer');
+        const closeFxBtn = document.getElementById('closeFxBtn');
+        const resetFxBtn = document.getElementById('resetFxBtn');
+        const sliderBrightness = document.getElementById('sliderBrightness');
+        const sliderContrast = document.getElementById('sliderContrast');
+        const sliderSaturate = document.getElementById('sliderSaturate');
+
+        function applyVideoFilters() {
+            const b = sliderBrightness.value;
+            const c = sliderContrast.value;
+            const s = sliderSaturate.value;
+
+            document.getElementById('valBrightness').textContent = `${b}%`;
+            document.getElementById('valContrast').textContent = `${c}%`;
+            document.getElementById('valSaturate').textContent = `${s}%`;
+
+            video.style.filter = `brightness(${b}%) contrast(${c}%) saturate(${s}%)`;
+        }
+
+        sliderBrightness.addEventListener('input', applyVideoFilters);
+        sliderContrast.addEventListener('input', applyVideoFilters);
+        sliderSaturate.addEventListener('input', applyVideoFilters);
+
+        resetFxBtn.addEventListener('click', () => {
+            sliderBrightness.value = 100;
+            sliderContrast.value = 100;
+            sliderSaturate.value = 100;
+            applyVideoFilters();
+            showToast("Filtros de Vídeo Resetados");
+        });
+
+        toggleFxBtn.addEventListener('click', () => {
+            const isHidden = fxDrawer.classList.contains('opacity-0');
+            if (isHidden) {
+                fxDrawer.classList.remove('opacity-0', 'pointer-events-none', 'translate-x-4');
+                fxDrawer.classList.add('opacity-100', 'translate-x-0');
+            } else {
+                fxDrawer.classList.add('opacity-0', 'pointer-events-none', 'translate-x-4');
+                fxDrawer.classList.remove('opacity-100', 'translate-x-0');
+            }
+        });
+
+        closeFxBtn.addEventListener('click', () => {
+            fxDrawer.classList.add('opacity-0', 'pointer-events-none', 'translate-x-4');
+        });
+
+        // Search Input Handlers
+        const catalogSearchInput = document.getElementById('catalogSearchInput');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+        catalogSearchInput.addEventListener('input', (e) => {
+            if (e.target.value) {
+                clearSearchBtn.classList.remove('hidden');
+            } else {
+                clearSearchBtn.classList.add('hidden');
+            }
+            clearTimeout(searchDebounceTimer);
+            localSearchPage = 1;
+            remoteSearchPage = 1;
+            searchDebounceTimer = setTimeout(() => renderCatalog(), 350);
+        });
+
+        clearSearchBtn.addEventListener('click', () => {
+            catalogSearchInput.value = '';
+            clearSearchBtn.classList.add('hidden');
+            localSearchPage = 1;
+            remoteSearchPage = 1;
+            renderCatalog();
+        });
+
+        document.getElementById('searchPrevBtn').addEventListener('click', () => {
+            if (localSearchPage <= 1) return;
+            localSearchPage--;
+            renderCatalog({ remote: false });
+        });
+        document.getElementById('searchNextBtn').addEventListener('click', () => {
+            if (!localSearchHasNext) return;
+            localSearchPage++;
+            renderCatalog({ remote: false });
+        });
+        document.getElementById('remotePrevBtn').addEventListener('click', () => {
+            if (remoteSearchPage <= 1) return;
+            remoteSearchPage--;
+            renderCatalog({ local: false });
+        });
+        document.getElementById('remoteNextBtn').addEventListener('click', () => {
+            if (!remoteSearchHasNext) return;
+            remoteSearchPage++;
+            renderCatalog({ local: false });
+        });
+
+        // Speed & Screen Controls
+        document.getElementById('speedSelect').addEventListener('change', (e) => {
+            video.playbackRate = parseFloat(e.target.value);
+            syncCustomPipSpeed(e.target.value);
+            showToast(`Velocidade: ${e.target.value}x`);
+        });
+
+        const viewPlayer = document.getElementById('viewPlayer');
+        const playerControls = document.getElementById('playerControls');
+        const playerBackBtn = document.getElementById('playerBackBtn');
+        let fullscreenControlsTimer = null;
+        let fullscreenUiTimer = null;
+		const pendingWindowCommands = new Map();
+		let windowCommandSequence = 0;
+		let playerExitPromise = null;
+		let playerExitPending = false;
+		let pendingViewAfterPiP = null;
+		let fullscreenTransitionPending = false;
+		let pipTransitionPending = false;
+		let cleanupInProgress = false;
+		let playerBackCleanupCount = 0;
+		let lifecycleLastTime = 0;
+		let windowCommandPending = false;
+		let closeRequested = false;
+		let shutdownCleanupPerformed = false;
+		let staleTransitionCheckTimer = null;
+
+        function signalNativeWindow(action) {
+			if (!window.chrome?.webview?.postMessage) return Promise.reject(new Error('Ponte nativa indisponível.'));
+			const commandId = `window-${Date.now()}-${++windowCommandSequence}`;
+			const preservedSession = activeEpisodeSession;
+			const preservedHls = activeHls;
+			windowCommandPending = true;
+			reportPlayerLifecycle('window-command-sent', { nativeCommand: action });
+			return new Promise((resolve, reject) => {
+				const timer = setTimeout(() => {
+					pendingWindowCommands.delete(commandId);
+					windowCommandPending = pendingWindowCommands.size > 0;
+					reportPlayerLifecycle('window-command-timeout', { nativeCommand: action });
+					reject(new Error('Comando de janela expirou.'));
+				}, 3000);
+				pendingWindowCommands.set(commandId, { resolve, reject, timer, action, preservedSession, preservedHls });
+				window.chrome.webview.postMessage({ type: 'window-command', commandId, action });
+			});
+        }
+
+		function reportPlayerLifecycle(eventName, options = {}) {
+			if (!window.chrome?.webview?.postMessage) return;
+			const currentTime = Number(video.currentTime || 0);
+			const progressing = currentTime > lifecycleLastTime;
+			lifecycleLastTime = currentTime;
+			window.chrome.webview.postMessage({
+				type: 'player-lifecycle-diagnostic',
+				event: eventName,
+				activeSession: Boolean(activeEpisodeSession),
+				activeHls: Boolean(activeHls),
+				paused: video.paused,
+				readyState: video.readyState,
+				currentTimeProgressing: progressing,
+				mode: document.fullscreenElement ? 'fullscreen' : isCustomPipActive ? 'pip' : 'normal',
+				nativeCommand: options.nativeCommand || 'none',
+				navigationTarget: options.navigationTarget || 'none',
+				cleanupCount: playerBackCleanupCount,
+				isChangingEpisode,
+				transitionPending: Boolean(playerExitPending || fullscreenTransitionPending || pipTransitionPending),
+				playerExitPending,
+				fullscreenPending: fullscreenTransitionPending,
+				pipPending: pipTransitionPending,
+				pendingTargetView: pendingNavigationRequest?.viewName || pendingViewAfterPiP?.viewName || pendingViewAfterFullscreen?.viewName || 'none',
+				windowCommandPending,
+				currentView: viewNavigation.currentView,
+				closeRequested,
+				restoreSucceeded: Boolean(options.restoreSucceeded)
+			});
+		}
+
+		function performCloseCleanup(markCloseRequested = false) {
+			if (markCloseRequested) closeRequested = true;
+			if (shutdownCleanupPerformed) return false;
+			shutdownCleanupPerformed = true;
+			clearTimeout(staleTransitionCheckTimer);
+			pendingNavigationRequest = null;
+			pendingViewAfterFullscreen = null;
+			pendingViewAfterPiP = null;
+			fullscreenTransitionPending = false;
+			pipTransitionPending = false;
+			savePlaybackProgress(true);
+			cancelActiveEpisodeSession('app-close');
+			return true;
+		}
+
+		async function handleWindowControl(action) {
+			reportPlayerLifecycle('window-control-clicked', { nativeCommand: action });
+			if (action === 'close') performCloseCleanup(true);
+			try {
+				await signalNativeWindow(action);
+			} catch {
+				reportPlayerLifecycle('window-command-failed', { nativeCommand: action });
+			} finally {
+				windowCommandPending = pendingWindowCommands.size > 0;
+			}
+		}
+
+        function showFullscreenControls(autoHide = true) {
+            viewPlayer.classList.add('controls-visible');
+            clearTimeout(fullscreenControlsTimer);
+            if (autoHide) {
+                fullscreenControlsTimer = setTimeout(() => {
+                    if (!playerControls.matches(':hover') && !playerControls.matches(':focus-within')) {
+                        viewPlayer.classList.remove('controls-visible');
+                    }
+                }, 1800);
+            }
+        }
+
+        function showFullscreenUi(autoHide = true) {
+            viewPlayer.classList.add('ui-visible');
+            clearTimeout(fullscreenUiTimer);
+            if (autoHide) {
+                fullscreenUiTimer = setTimeout(() => {
+                    if (!playerBackBtn.matches(':hover') && !playerBackBtn.matches(':focus-visible')) {
+                        viewPlayer.classList.remove('ui-visible');
+                    }
+                }, 1800);
+            }
+        }
+
+        document.getElementById('fullscreenBtn').addEventListener('click', async () => {
+            try {
+				reportPlayerLifecycle('fullscreen-requested');
+				fullscreenTransitionPending = true;
+                if (!document.fullscreenElement) {
+                    await viewPlayer.requestFullscreen();
+                } else {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                showToast("Não foi possível ativar a tela cheia");
+			} finally {
+				fullscreenTransitionPending = false;
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            const isFullscreen = document.fullscreenElement === viewPlayer;
+			const preservedSession = activeEpisodeSession;
+			const preservedHls = activeHls;
+			const fullscreenCommand = isFullscreen ? 'fullscreen-enter' : 'fullscreen-exit';
+			signalNativeWindow(fullscreenCommand).then(() => {
+				reportPlayerLifecycle(isFullscreen ? 'fullscreen-entered' : 'fullscreen-exited', { nativeCommand: fullscreenCommand, restoreSucceeded: true });
+				reportPlayerLifecycle(activeEpisodeSession === preservedSession && activeHls === preservedHls ? 'fullscreen-session-preserved' : 'fullscreen-unexpected-cleanup', { nativeCommand: fullscreenCommand, restoreSucceeded: true });
+			}).catch(() => reportPlayerLifecycle('fullscreen-session-preserved', { nativeCommand: fullscreenCommand }));
+            if (isFullscreen) {
+                showFullscreenUi();
+                showFullscreenControls();
+            } else {
+                clearTimeout(fullscreenControlsTimer);
+                clearTimeout(fullscreenUiTimer);
+                viewPlayer.classList.remove('controls-visible');
+                viewPlayer.classList.remove('ui-visible');
+
+            }
+        });
+
+        viewPlayer.addEventListener('mousemove', (event) => {
+            if (document.fullscreenElement !== viewPlayer) return;
+            showFullscreenUi();
+            const nearBottom = window.innerHeight - event.clientY <= 150;
+            if (nearBottom) {
+                showFullscreenControls();
+            } else if (!playerControls.matches(':hover')) {
+                clearTimeout(fullscreenControlsTimer);
+                viewPlayer.classList.remove('controls-visible');
+            }
+        });
+
+        playerControls.addEventListener('mouseenter', () => showFullscreenControls(false));
+        playerControls.addEventListener('mouseleave', () => showFullscreenControls());
+        playerBackBtn.addEventListener('mouseenter', () => showFullscreenUi(false));
+        playerBackBtn.addEventListener('mouseleave', () => showFullscreenUi());
+
+        let isCustomPipActive = false;
+
+		function recoverStaleTransition() {
+			staleTransitionCheckTimer = null;
+			const modeIsNormal = !document.fullscreenElement && !isCustomPipActive;
+			const nativeIdle = !windowCommandPending;
+			const stale = modeIsNormal && nativeIdle && activeEpisodeSession && activeHls && !playerExitPending &&
+				(fullscreenTransitionPending || pipTransitionPending || pendingViewAfterPiP !== null);
+			if (!stale) return;
+			reportPlayerLifecycle('stale-transition-detected', { nativeCommand: 'none' });
+			pendingViewAfterPiP = null;
+			fullscreenTransitionPending = false;
+			pipTransitionPending = false;
+			reportPlayerLifecycle('stale-transition-recovered', { nativeCommand: 'none', restoreSucceeded: true });
+		}
+
+        async function setCustomPictureInPicture(active, restoreRequested = false) {
+            if (active && (!video.currentSrc || video.readyState < HTMLMediaElement.HAVE_METADATA)) {
+                showToast("Aguarde o vídeo carregar para usar o PiP");
+				return false;
+            }
+
+			if (isCustomPipActive === active) return true;
+			const activeVideoElement = video;
+			const preservedSession = activeEpisodeSession;
+			const preservedHls = activeHls;
+			const wasPaused = video.paused;
+			const action = active ? 'pip-enter' : restoreRequested ? 'pip-restore' : 'pip-exit';
+			reportPlayerLifecycle(active ? 'pip-requested' : 'pip-restore-clicked', { nativeCommand: action });
+			pipTransitionPending = true;
+			reportPlayerLifecycle('pip-transition-start', { nativeCommand: action });
+			try {
+				if (document.fullscreenElement) {
+					await document.exitFullscreen();
+					await signalNativeWindow('fullscreen-exit');
+				}
+				if (active) {
+					toggleEpisodeDrawer(false);
+					document.body.classList.add('pip-mode');
+					isCustomPipActive = true;
+					customPipSettingsMenu.classList.add('hidden');
+					syncCustomPipSpeed(video.playbackRate);
+				}
+				reportPlayerLifecycle(active ? 'pip-requested' : 'pip-restore-command-sent', { nativeCommand: action });
+				await signalNativeWindow(action);
+				if (!active) {
+					document.body.classList.remove('pip-mode');
+					isCustomPipActive = false;
+					customPipSettingsMenu.classList.add('hidden');
+				}
+				if (activeVideoElement !== document.getElementById('mainVideo') || video !== activeVideoElement) throw new Error('Elemento de vídeo alterado.');
+				if (video.paused !== wasPaused || activeEpisodeSession !== preservedSession || activeHls !== preservedHls) reportPlayerLifecycle('pip-unexpected-cleanup', { nativeCommand: action });
+				reportPlayerLifecycle(active ? 'pip-entered' : 'pip-restored', { nativeCommand: action, restoreSucceeded: true });
+				reportPlayerLifecycle('pip-session-preserved', { nativeCommand: action, restoreSucceeded: true });
+				if (!active) reportPlayerLifecycle('pip-exited', { nativeCommand: action, restoreSucceeded: true });
+				return true;
+			} catch {
+				if (active) {
+					document.body.classList.remove('pip-mode');
+					isCustomPipActive = false;
+				}
+				reportPlayerLifecycle('pip-restore-failed', { nativeCommand: action });
+				return false;
+			} finally {
+				pipTransitionPending = false;
+				pendingViewAfterPiP = null;
+				reportPlayerLifecycle('pip-transition-finally', { nativeCommand: action, restoreSucceeded: !isCustomPipActive === !active });
+				reportPlayerLifecycle('pip-transition-cleared', { nativeCommand: action, restoreSucceeded: true });
+				clearTimeout(staleTransitionCheckTimer);
+				staleTransitionCheckTimer = setTimeout(() => recoverStaleTransition(), 250);
+			}
+        }
+
+		document.getElementById('pipBtn').addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); setCustomPictureInPicture(true); });
+		document.getElementById('pipRestoreBtn').addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); setCustomPictureInPicture(false, true); });
+		document.getElementById('pipCloseBtn').addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); setCustomPictureInPicture(false, true); });
+		document.getElementById('customPipRestoreBtn').addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); setCustomPictureInPicture(false, true); });
+        customPipPlayBtn.addEventListener('click', togglePlay);
+        customPipMuteBtn.addEventListener('click', () => muteBtn.click());
+        customPipNextBtn.addEventListener('click', () => {
+			if (currentAnime && currentEpIndex < playerEpisodes.length - 1) loadEpisode(currentEpIndex + 1);
+        });
+        customPipSettingsBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            customPipSettingsMenu.classList.toggle('hidden');
+        });
+        customPipSpeedButton.addEventListener('click', () => customPipSpeedOptions.classList.toggle('hidden'));
+        customPipSpeedOptionButtons.forEach(button => button.addEventListener('click', () => {
+            video.playbackRate = Number(button.dataset.speed);
+            document.getElementById('speedSelect').value = button.dataset.speed;
+            syncCustomPipSpeed(button.dataset.speed);
+            customPipSpeedOptions.classList.add('hidden');
+        }));
+
+        document.getElementById('prevEpBtn').addEventListener('click', () => {
+            if (currentEpIndex > 0) loadEpisode(currentEpIndex - 1);
+        });
+
+        document.getElementById('nextEpBtn').addEventListener('click', () => {
+			if (currentEpIndex < playerEpisodes.length - 1) loadEpisode(currentEpIndex + 1);
+        });
+
+        // Shortcuts Modal
+        const shortcutsBtn = document.getElementById('shortcutsBtn');
+        const shortcutsModal = document.getElementById('shortcutsModal');
+        const closeShortcutsBtn = document.getElementById('closeShortcutsBtn');
+
+        shortcutsBtn.addEventListener('click', () => shortcutsModal.classList.remove('opacity-0', 'pointer-events-none'));
+        closeShortcutsBtn.addEventListener('click', () => shortcutsModal.classList.add('opacity-0', 'pointer-events-none'));
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+
+            switch (e.key.toLowerCase()) {
+                case ' ':
+                    e.preventDefault();
+                    togglePlay();
+                    break;
+                case 'f':
+                    document.getElementById('fullscreenBtn').click();
+                    break;
+                case 'm':
+                    muteBtn.click();
+                    break;
+                case 'arrowleft':
+                    video.currentTime = Math.max(0, video.currentTime - 5);
+                    showToast("-5s");
+                    break;
+                case 'arrowright':
+                    video.currentTime = Math.min(video.duration, video.currentTime + 5);
+                    showToast("+5s");
+                    break;
+                case 'arrowup':
+                    e.preventDefault();
+                    video.volume = Math.min(1, video.volume + 0.1);
+                    updateVolumeUI();
+                    showToast(`Volume: ${Math.round(video.volume * 100)}%`);
+                    break;
+                case 'arrowdown':
+                    e.preventDefault();
+                    video.volume = Math.max(0, video.volume - 0.1);
+                    updateVolumeUI();
+                    showToast(`Volume: ${Math.round(video.volume * 100)}%`);
+                    break;
+                case 'escape':
+                    shortcutsModal.classList.add('opacity-0', 'pointer-events-none');
+                    break;
+            }
+        });
+
+        function showToast(message) {
+            toastText.textContent = message;
+            toast.classList.remove('opacity-0', '-translate-y-3');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-3');
+            }, 2200);
+        }
+
+        playPauseBtn.addEventListener('click', togglePlay);
+        centerPlayBtn.addEventListener('click', togglePlay);
+        video.addEventListener('click', togglePlay);
+
+        // Integração com os controles da janela nativa .NET MAUI.
+        document.getElementById('windowMinimizeBtn').addEventListener('click', () => handleWindowControl('minimize'));
+        document.getElementById('windowMaximizeBtn').addEventListener('click', () => handleWindowControl('maximize'));
+        document.getElementById('windowCloseBtn').addEventListener('click', () => handleWindowControl('close'));
+
+        window.onload = function() {
+            updateVolumeUI();
+            loadHomeFromApi(true);
+        };
+    </script>
+</body>
+</html>

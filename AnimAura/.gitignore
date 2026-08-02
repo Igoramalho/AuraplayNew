@@ -1,0 +1,12 @@
+bin/
+obj/
+publish/
+AppPackages/
+.vs/
+
+*.user
+*.suo
+*.log
+
+.env
+.env.*

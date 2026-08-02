@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <Compile Include="..\..\Services\AuraPlayApiClient.cs" Link="Production\AuraPlayApiClient.cs" />
+    <Compile Include="..\..\Services\AuraPlayApiException.cs" Link="Production\AuraPlayApiException.cs" />
+    <Compile Include="..\..\Services\IAuraPlayApiClient.cs" Link="Production\IAuraPlayApiClient.cs" />
+	<Compile Include="..\..\Services\FavoritesStore.cs" Link="Production\FavoritesStore.cs" />
+	<Compile Include="..\..\Services\HlsPlaylistDiagnostics.cs" Link="Production\HlsPlaylistDiagnostics.cs" />
+	<Compile Include="..\..\Services\PlaybackScopePolicy.cs" Link="Production\PlaybackScopePolicy.cs" />
+	<Compile Include="..\..\Services\WindowCaptionRegionPolicy.cs" Link="Production\WindowCaptionRegionPolicy.cs" />
+    <Compile Include="..\..\Models\Api\*.cs" Link="Production\Models\%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>
